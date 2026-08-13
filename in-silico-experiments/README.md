@@ -76,7 +76,7 @@ The runner order in [experiments/run_all.py](experiments/run_all.py) is:
 
 The controller under test is this repository's own governance code, loaded
 verbatim at run time; the simulator, metrics, and baseline policies in
-`sim/` are from the ARL paper's evaluation suite (<PAPER_REPO_URL>). All
+`sim/` are from the ARL paper's evaluation suite. All
 inputs are synthetic; no learner data is included. The module checksums,
 configuration identity, and seeds of the canonical run are recorded in
 the thesis. MIT Licence (see `LICENSE`).

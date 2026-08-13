@@ -4,9 +4,7 @@ X-ELRA is the reference implementation of Agentic Regulated Learning (ARL): mach
 
 This README is operational only: how to install, run, inspect, and reproduce. The architecture, formal specification, algorithms, terminology, and evaluation are documented in the thesis, which is the single source of truth for everything conceptual.
 
-**Thesis**: <THESIS_CITATION>
-**ARL specification and standalone evaluation suite**: <PAPER_REPO_URL>
-**Archive**: <ZENODO_DOI>
+**Archive**: [10.5281/zenodo.21916376](https://doi.org/10.5281/zenodo.21916376)
 **Licence**: MIT (see `LICENSE`)
 
 ---
