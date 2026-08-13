@@ -1,0 +1,40 @@
+{
+  "study": "study4_robustness",
+  "system": "deployed governance modules (ARL_dep)",
+  "replay_determinism": {
+    "matches": 12000,
+    "total": 12000,
+    "rate": 1.0,
+    "method": "persist pre-decision state + inputs (JSON round-trip); independent instance re-executes the full cycle"
+  },
+  "order_invariance": {
+    "decision_invariant": 4800,
+    "canonical_hash_invariant": 4800,
+    "total": 4800,
+    "decision_rate": 1.0,
+    "hash_rate": 1.0
+  },
+  "missing_modality_guard": {
+    "missing_modality_decisions": 1920,
+    "routed_to_diagnostic_rate": 1.0,
+    "deployed_pedagogical_action_rate": 0.0,
+    "deployed_integrity_probe_rate": 0.0625,
+    "guardfree_inappropriate_action_rate": 0.0625,
+    "episodes": 120,
+    "episodes_deployed_pedagogical_on_incomplete_data": 0,
+    "episodes_guardfree_acted_on_incomplete_data": 120,
+    "determinism_on_outage_streams": true,
+    "note": "P2 is the data-integrity probe permitted in DIAGNOSTIC (the guard acting); pedagogical/affective routines are P3/P5/P6/P8. Guard-free counterfactual is the published harness ablation."
+  },
+  "late_signal_snapshot": {
+    "applicable": true,
+    "shift_index": 15,
+    "n_decisions": 80,
+    "n_differing_decisions": 0,
+    "first_differing_index": null,
+    "last_differing_index": null,
+    "no_retroactive_change": true,
+    "reconverged_before_end": false,
+    "both_runs_deterministic": true
+  }
+}

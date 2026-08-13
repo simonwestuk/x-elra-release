@@ -1,0 +1,6 @@
+Skulpt is made available under the MIT License.
+https://raw.githubusercontent.com/skulpt/skulpt/main/LICENSE
+
+This repository includes a compact shim that is API-compatible with Skulpt's
+browser build for local development. Replace it with the official runtime for
+production deployments.

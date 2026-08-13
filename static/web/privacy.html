@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>X‑ELRA Privacy & Transparency</title>
+  <style>
+    body{max-width:960px;margin:0 auto;padding:24px 16px;color:#111;background:#f8f9fb;font-family:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;line-height:1.6;}
+    header{margin-bottom:32px;text-align:center;}
+    header h1{margin-bottom:0.4em;font-size:2.2rem;}
+    header p{margin:0;color:#555;}
+    section{margin-bottom:32px;background:#fff;border-radius:12px;padding:24px;box-shadow:0 6px 22px rgba(15,23,42,0.08);}
+    section h2{margin-top:0;font-size:1.45rem;color:#0f172a;}
+    dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:0;}
+    dl div{padding:12px;background:#f1f5f9;border-radius:10px;}
+    dt{font-weight:600;margin-bottom:6px;color:#0f172a;text-transform:uppercase;font-size:0.75rem;letter-spacing:0.05em;}
+    dd{margin:0;font-size:0.95rem;word-break:break-word;}
+    ul{margin:0;padding-left:20px;}
+    li{margin-bottom:8px;}
+    .pill{display:inline-flex;align-items:center;gap:4px;background:#e2e8f0;border-radius:999px;padding:2px 10px;font-size:0.85rem;font-weight:600;color:#0f172a;}
+    .back-link{display:inline-flex;align-items:center;gap:6px;color:#2563eb;text-decoration:none;font-weight:600;}
+    .back-link:hover{text-decoration:underline;}
+    .status{font-size:0.85rem;color:#475569;margin-top:12px;}
+    .error{color:#b91c1c;font-weight:600;}
+    pre{overflow:auto;background:#0f172a;color:#e2e8f0;padding:12px;border-radius:8px;font-size:0.85rem;}
+    @media (max-width:640px){section{padding:18px;}body{padding:16px;}header h1{font-size:1.75rem;}}
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back-link" href="./standalone.html">← Back to X‑ELRA</a>
+    <h1>Privacy & Transparency</h1>
+    <p>This page explains how the X‑ELRA research platform handles your data and how the recommender makes decisions.</p>
+  </header>
+
+  <section>
+    <h2>Data handling at a glance</h2>
+    <ul>
+      <li><strong>Purpose:</strong> We record interactions to evaluate and improve recommendation quality, explainability, and overload controls.</li>
+      <li><strong>Identifiers:</strong> Learners are referenced by the ID or email you provide when signing in. No additional personal data is collected.</li>
+      <li><strong>Events stored:</strong> Consent decisions, item impressions, clicks, completions, preference updates, and sentiment feedback are logged.</li>
+      <li><strong>Retention:</strong> Data is stored in secured databases aligned to institutional policy. Retention periods follow the approved ethics protocol.</li>
+      <li><strong>Access:</strong> Only the research team supporting X‑ELRA can access raw logs. Aggregated analytics may be shared with stakeholders.</li>
+      <li><strong>Opt-out:</strong> You can withdraw consent at any time via the consent banner. Doing so stops data collection and purges recent sentiment entries.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>How this system makes decisions</h2>
+    <p>
+      The system routes each learner into a predefined learning pathway. Each pathway combines multiple signals—curriculum sequence,
+      collaborative filtering, popularity trends, and optional sentiment analysis—using the weightings listed below. Some pathways also
+      enable explanation overlays so you can see why a recommendation appears.
+    </p>
+    <div id="armsContainer">
+      <p class="status">Loading current pathway…</p>
+    </div>
+    <p>
+      Regardless of pathway, the service filters out items you have already completed, promotes those aligned with your stated goals,
+      and tracks responses to keep the experience adaptive. You can change your preferences at any time; new events immediately
+      influence subsequent recommendations.
+    </p>
+  </section>
+
+  <section>
+    <h2>Current build & version identifiers</h2>
+    <dl id="versionInfo">
+      <div>
+        <dt>Control routine version</dt>
+        <dd id="policyVersion">Loading…</dd>
+      </div>
+      <div>
+        <dt>Schema version</dt>
+        <dd id="schemaVersion">Loading…</dd>
+      </div>
+      <div>
+        <dt>Build tag</dt>
+        <dd id="buildTag">Loading…</dd>
+      </div>
+      <div>
+        <dt>Git commit</dt>
+        <dd id="gitCommit">Loading…</dd>
+      </div>
+      <div>
+        <dt>Build time</dt>
+        <dd id="buildTime">Loading…</dd>
+      </div>
+      <div>
+        <dt>Environment</dt>
+        <dd id="appEnv">Loading…</dd>
+      </div>
+    </dl>
+    <div id="versionStatus" class="status"></div>
+  </section>
+
+  <section>
+    <h2>Questions or concerns?</h2>
+    <p>
+      Contact the X‑ELRA operations team at <a href="mailto:Simon.West@port.ac.uk">Simon.West@port.ac.uk</a> if you would like
+      to exercise your data rights, report an issue, or learn more about the service. Please include your learner ID so we can
+      locate your records.
+    </p>
+  </section>
+
+  <script>
+    async function loadVersionSnapshot(){
+      const status = document.getElementById('versionStatus');
+      try {
+        const res = await fetch('/v1/version', { headers: { 'Accept': 'application/json' } });
+        if(!res.ok){ throw new Error(`Request failed with status ${res.status}`); }
+        const data = await res.json();
+        const policy = data?.policy;
+        const arms = data?.arms;
+        const policyVersion = (policy && policy.version !== undefined)
+          ? String(policy.version)
+          : extractPolicyVersionFromArms(arms);
+        document.getElementById('policyVersion').textContent = policyVersion || 'Unavailable';
+        document.getElementById('schemaVersion').textContent = data?.schema_version || 'Unavailable';
+        document.getElementById('buildTag').textContent = data?.tag || '—';
+        document.getElementById('gitCommit').textContent = truncate(data?.git_commit);
+        document.getElementById('buildTime').textContent = data?.build_time || 'Unavailable';
+        document.getElementById('appEnv').textContent = data?.app_env || 'Unavailable';
+        if(status){ status.textContent = 'Snapshot pulled from /v1/version.'; }
+        renderArms(arms);
+      } catch(err){
+        console.error('Failed to load /v1/version', err);
+        if(status){
+          status.innerHTML = `<span class="error">Unable to load build metadata.</span> We could not reach /v1/version (${err.message}).`;
+        }
+        renderArms(null);
+      }
+    }
+
+    function truncate(value){
+      if(!value){ return 'Unavailable'; }
+      const str = String(value);
+      return str.length > 12 ? `${str.slice(0, 12)}…` : str;
+    }
+
+    function extractPolicyVersionFromArms(arms){
+      if(!arms || typeof arms !== 'object'){ return null; }
+      for(const key of Object.keys(arms)){
+        const entry = arms[key];
+        if(entry && typeof entry === 'object' && 'policy_version' in entry){
+          const version = entry.policy_version;
+          if(version !== undefined && version !== null){
+            return String(version);
+          }
+        }
+      }
+      return null;
+    }
+
+    function renderArms(arms){
+      const container = document.getElementById('armsContainer');
+      if(!container){ return; }
+      if(!arms || typeof arms !== 'object' || Object.keys(arms).length === 0){
+        container.innerHTML = '<p class="status">No arm definitions available.</p>';
+        return;
+      }
+      const list = document.createElement('div');
+      list.className = 'arms-list';
+      for(const [name, cfg] of Object.entries(arms)){
+        if(!cfg || typeof cfg !== 'object'){ continue; }
+        const card = document.createElement('div');
+        card.style.border = '1px solid #e2e8f0';
+        card.style.borderRadius = '10px';
+        card.style.padding = '16px';
+        card.style.marginBottom = '16px';
+        const title = document.createElement('h3');
+        title.textContent = cfg.label ? `${cfg.label} (${name})` : name;
+        title.style.marginTop = '0';
+        card.appendChild(title);
+
+        const meta = document.createElement('p');
+        meta.className = 'status';
+        const explain = cfg.explain ? 'enabled' : 'disabled';
+        const sentiment = cfg.sentiment?.enabled ? 'enabled' : 'disabled';
+        meta.textContent = `Policy version ${cfg.policy_version ?? '—'} · Strategy ${cfg.strategy ?? '—'} · Explanations ${explain} · Sentiment ${sentiment}`;
+        card.appendChild(meta);
+
+        if(cfg.regulatory_mode){
+          const reg = document.createElement('p');
+          reg.innerHTML = '<strong>Process-level transparency:</strong> ARL regulatory mode active — provides mode labels, personalised rationale, system behaviour descriptions, expected actions, and exit conditions.';
+          card.appendChild(reg);
+        } else if(cfg.explain){
+          const reg = document.createElement('p');
+          reg.innerHTML = '<strong>Explanation type:</strong> Post-hoc feature attribution only (model-level). No process-level regulatory transparency.';
+          card.appendChild(reg);
+        } else {
+          const reg = document.createElement('p');
+          reg.innerHTML = '<strong>Explanation type:</strong> Progress display only — no recommendation explanations provided.';
+          card.appendChild(reg);
+        }
+
+        if(cfg.weight_map && typeof cfg.weight_map === 'object'){
+          const weights = document.createElement('p');
+          const pairs = Object.entries(cfg.weight_map)
+            .map(([signal, weight]) => `${signal}: ${(Number(weight)).toFixed(2)}`)
+            .join(', ');
+          weights.innerHTML = `<strong>Signal weighting:</strong> ${pairs}`;
+          card.appendChild(weights);
+        }
+
+        if(cfg.xai && typeof cfg.xai === 'object' && cfg.xai.enabled){
+          const xai = document.createElement('p');
+          xai.innerHTML = `<strong>XAI:</strong> level ${cfg.xai.level ?? 'auto'} via ${cfg.xai.method ?? 'unspecified'} method.`;
+          card.appendChild(xai);
+        }
+
+        list.appendChild(card);
+      }
+      container.innerHTML = '';
+      container.appendChild(list);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadVersionSnapshot);
+  </script>
+</body>
+</html>

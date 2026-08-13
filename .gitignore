@@ -1,0 +1,43 @@
+# ---- Secrets and live-study data (never publish) ----
+.env
+.env.*
+!.env.example
+
+# ---- Python bytecode, caches, build artefacts ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ---- Virtual environments ----
+.venv/
+venv/
+env/
+
+# ---- Model and framework caches (large, re-downloadable) ----
+.hf_cache/
+local_model/
+
+# ---- Node / frontend tooling ----
+node_modules/
+
+# ---- Editor, OS, and assistant artefacts ----
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
+*.log
+
+# ---- Runtime data (created locally; never publish) ----
+data/

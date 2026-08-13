@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>X-ELRA</title>
+  <meta
+    name="xelra-md-live"
+    data-engine="skulpt"
+    data-auto-select-engine="false"
+    data-item-id="standalone-lesson"
+    data-learner-id="standalone-user"
+    data-session-id="standalone"
+    data-attempt-id="attempt-standalone"
+    data-telemetry-consent="granted"
+    data-telemetry-base-url="/v1/telemetry/live"
+    data-timeout-ms="7000"
+  />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/standalone.css" />
+  <link rel="stylesheet" href="../css/arl-actions.css" />
+</head>
+<body>
+  <!-- Skip links for keyboard / screen-reader users (WCAG 2.4.1) -->
+  <a href="#board" class="skip-link">Skip to recommendations</a>
+  <a href="#olmPanel" class="skip-link">Skip to learning guidance</a>
+
+  <nav class="navbar navbar-expand-lg sticky-top py-2">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-semibold" href="#" aria-label="X-ELRA Home"><i class="bi bi-grid-3x3-gap me-2" aria-hidden="true"></i>X‑ELRA</a>
+      <!-- System Activity in navbar -->
+      <div id="navActivityIndicator" class="nav-activity d-flex align-items-center ms-3" style="display:none">
+        <span class="activity-dot"></span>
+        <span id="navActivityText" class="small text-muted ms-2">Ready to help</span>
+      </div>
+      <div class="d-flex align-items-center gap-2 ms-auto" id="topnav">
+        <span id="armBadge" class="badge text-bg-dark" style="display:none"></span>
+        <button class="btn btn-sm btn-outline-light" id="btnAllSkillsNav" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasOLM" style="display:none">
+          <i class="bi bi-bar-chart-line me-1"></i><span class="d-none d-sm-inline">All Skills</span>
+        </button>
+        <button class="btn btn-sm btn-outline-light" id="btnSignOut" style="display:none" aria-label="Sign out">
+          <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+          <span class="d-none d-sm-inline ms-1">Sign out</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CORS warning (shown if fetch fails due to access control) -->
+  <div id="corsAlert" class="container mt-3" style="display:none;">
+    <div class="alert alert-warning">
+      Unable to reach the API due to browser CORS. Please ensure you are accessing
+      this page through the application server (not opening the file directly)
+      or enable CORS on the back-end.
+    </div>
+  </div>
+  <div id="apiErrorAlert" class="container mt-3" style="display:none;">
+    <div class="alert alert-danger" role="alert">
+      <span data-role="message"></span>
+    </div>
+  </div>
+
+  <main id="viewApp" class="container-fluid px-0" style="display:none;">
+      <div class="app-layout">
+        <!-- Left: Main Learning Area -->
+        <div class="learning-area">
+          <div id="board" class="board-grid"></div>
+        </div>
+
+        <!-- Right: Persistent OLM Panel -->
+        <aside id="olmPanel" class="olm-panel" role="complementary" aria-label="Learning guidance panel">
+          <div class="olm-panel-content">
+            <div id="regulatoryModeCard" class="regulatory-mode-card mb-3" aria-live="polite">
+              <div class="mode-header" role="button" tabindex="0" aria-expanded="false" aria-controls="modeBody" id="modeHeaderToggle">
+                <span class="mode-prefix">Mode:</span> <span class="mode-label" id="modeLabel">Progressing</span>
+                <i class="bi bi-chevron-down mode-toggle-icon"></i>
+              </div>
+              <div class="mode-body" id="modeBody" style="display:none">
+                <div class="mode-section mb-3">
+                  <h6 class="mode-section-title">Why</h6>
+                  <p class="mode-section-text" id="modeWhy">You're making steady progress through your learning materials.</p>
+                </div>
+                <div class="mode-section mb-3">
+                  <h6 class="mode-section-title">What the system will do</h6>
+                  <p class="mode-section-text" id="modeWhatSystemWillDo">Recommend materials based on your progress and learning goals.</p>
+                </div>
+                <div class="mode-section mb-3">
+                  <h6 class="mode-section-title">What you should do next</h6>
+                  <p class="mode-section-text" id="modeWhatNext">Continue with the current materials or explore recommended items.</p>
+                </div>
+                <div class="mode-section">
+                  <h6 class="mode-section-title">What will change this</h6>
+                  <p class="mode-section-text" id="modeExitConditions">The system will adapt as needed based on your progress.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Current Focus -->
+            <div id="focusCard" class="focus-card mb-3">
+              <h6 class="card-title">Your Focus</h6>
+              <div class="focus-body">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div>
+                    <div class="small text-muted text-uppercase mb-1">Target Skill</div>
+                    <strong id="focusSkillName">Python for ML</strong>
+                  </div>
+                  <button type="button" id="btnFocusGoalSide" class="goal-pill-small">
+                    <i class="bi bi-flag"></i>
+                    <span id="goalLabelSide">Set goal</span>
+                  </button>
+                </div>
+                <div class="progress mb-2" style="height: 8px;">
+                  <div class="progress-bar bg-success" id="focusMasteryBar" style="width: 0%"></div>
+                </div>
+                <div class="small text-muted" id="focusMasteryText">Current mastery: 0%</div>
+              </div>
+            </div>
+
+            <!-- Model Explanation (B1 only: feature attribution) -->
+            <div id="modelExplainCard" class="model-explain-card mb-3" style="display:none">
+              <h6 class="card-title">How we chose this</h6>
+              <div id="modelExplainBody" class="small"></div>
+            </div>
+
+            <!-- Latest Sentiment -->
+            <div id="latestSentimentOLM" class="mb-3" aria-live="polite"></div>
+
+            <!-- Quick Actions -->
+            <div class="olm-actions">
+              <button class="btn btn-sm btn-outline-light w-100" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCompleted" id="btnCompletedSide" style="display:none">
+                <i class="bi bi-check2-circle me-2"></i>Completed Items
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+  </main>
+
+  <section id="lessonPanel" class="lesson-view" style="display:none">
+    <div class="app-layout">
+      <!-- Left: Learning Content -->
+      <div class="learning-area lesson-content">
+        <div class="lesson-frame-wrapper position-relative">
+          <div id="lessonLoader" class="lesson-loader">
+            <div class="spinner-border text-light" role="status">
+              <span class="visually-hidden">Loading lesson...</span>
+            </div>
+            <div class="mt-2 small text-muted">Loading lesson...</div>
+          </div>
+          <iframe id="lessonViewer" title="Lesson viewer" class="lesson-iframe" tabindex="0"></iframe>
+          <div id="lessonAnnounce" class="visually-hidden" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <!-- Right: OLM Panel -->
+      <aside id="olmPanelLesson" class="olm-panel" role="complementary" aria-label="Learning guidance panel">
+        <div class="olm-panel-content">
+          <!-- System Activity Indicator (Lesson View) -->
+          <div id="systemActivityIndicatorLesson" class="system-activity mb-3">
+            <div class="d-flex align-items-center">
+              <span class="activity-dot"></span>
+              <span id="activityTextLesson" class="small text-muted ms-2">Tracking your activity</span>
+            </div>
+          </div>
+
+          <div id="regulatoryModeCardLesson" class="regulatory-mode-card mb-3" aria-live="polite">
+            <div class="mode-header" role="button" tabindex="0" aria-expanded="false" aria-controls="modeBodyLesson" id="modeHeaderToggleLesson">
+              <span class="mode-prefix">Mode:</span> <span class="mode-label" id="modeLabelLesson">Progressing</span>
+              <i class="bi bi-chevron-down mode-toggle-icon"></i>
+            </div>
+            <div class="mode-body" id="modeBodyLesson" style="display:none">
+              <div class="mode-section mb-3">
+                <h6 class="mode-section-title">Why</h6>
+                <p class="mode-section-text" id="modeWhyLesson">You're making steady progress through your learning materials.</p>
+              </div>
+              <div class="mode-section mb-3">
+                <h6 class="mode-section-title">What the system will do</h6>
+                <p class="mode-section-text" id="modeWhatSystemWillDoLesson">Recommend materials based on your progress and learning goals.</p>
+              </div>
+              <div class="mode-section mb-3">
+                <h6 class="mode-section-title">What you should do next</h6>
+                <p class="mode-section-text" id="modeWhatNextLesson">Continue with the current materials or explore recommended items.</p>
+              </div>
+              <div class="mode-section">
+                <h6 class="mode-section-title">What will change this</h6>
+                <p class="mode-section-text" id="modeExitConditionsLesson">The system will adapt as needed based on your progress.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Resource Info -->
+          <div id="currentResourceCard" class="focus-card mb-3">
+            <h6 class="card-title">Current Resource</h6>
+            <div class="focus-body">
+              <strong id="currentResourceTitle">Loading...</strong>
+              <div class="small text-muted mt-1" id="currentResourceMeta"></div>
+            </div>
+          </div>
+
+          <!-- Model Explanation (Lesson View) -->
+          <div id="modelExplainCardLesson" class="model-explain-card mb-3" style="display:none">
+            <h6 class="card-title">How we chose this</h6>
+            <div id="modelExplainBodyLesson" class="small"></div>
+          </div>
+
+          <!-- Latest Sentiment (Lesson View) -->
+          <div id="latestSentimentLesson" class="mb-3" aria-live="polite"></div>
+
+          <!-- Actions -->
+          <div class="olm-actions">
+            <button id="btnLessonBack" class="btn btn-sm btn-outline-light w-100 mb-2">
+              <i class="bi bi-arrow-left me-2"></i>Back to Recommendations
+            </button>
+            <button id="btnMarkComplete" class="btn btn-sm btn-success w-100">
+              <i class="bi bi-check2 me-2"></i>Mark Complete
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="viewLogin" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="backdrop-filter: blur(2px); z-index: 1050;">
+    <div class="login-sheet w-100 p-4">
+      <div class="d-flex align-items-center mb-3"><i class="bi bi-grid-3x3-gap me-2"></i><h4 class="mb-0">X‑ELRA — Sign in</h4></div>
+      <div id="stepEmail">
+        <div class="small text-muted mb-2">Step 1 of 3 — Enter email</div>
+        <p class="mb-3">Enter your email and we'll send a one-time access code so you can pick up where you left off.</p>
+        <div class="mb-3">
+          <input id="email" class="form-control" placeholder="you@example.com" type="email" aria-describedby="emailError" />
+          <div id="emailError" class="form-text text-danger mt-1" role="alert" aria-live="polite"></div>
+        </div>
+        <div class="d-grid">
+          <button id="btnReq" class="btn btn-primary">Send code</button>
+        </div>
+      </div>
+      <div id="stepCode" class="d-none">
+        <div class="small text-muted mb-2">Step 2 of 3 — Verify code</div>
+        <p>We've sent a 6‑digit code to <span id="sentTo" class="fw-semibold"></span>. Enter it below to sign in.</p>
+        <div class="otp-wrap mb-3">
+          <input class="otp-input form-control" maxlength="1" inputmode="numeric" />
+          <input class="otp-input form-control" maxlength="1" inputmode="numeric" />
+          <input class="otp-input form-control" maxlength="1" inputmode="numeric" />
+          <input class="otp-input form-control" maxlength="1" inputmode="numeric" />
+          <input class="otp-input form-control" maxlength="1" inputmode="numeric" />
+          <input class="otp-input form-control" maxlength="1" inputmode="numeric" />
+        </div>
+        <div class="d-grid mb-2">
+          <button id="btnVerify" class="btn btn-success" disabled>Verify</button>
+        </div>
+        <div id="codeError" class="small text-danger mb-2" role="alert" aria-live="polite"></div>
+        <div class="small mb-2"><a href="#" id="linkResend" class="link-secondary disabled">Resend code <span id="resendTimer"></span></a></div>
+        <div class="small text-muted">Check your spam or junk folder if you don't see the email.</div>
+        <div id="devCode" class="mt-2 small text-muted"></div>
+      </div>
+      <div id="stepConsent" class="d-none">
+        <div class="small text-muted mb-2">Step 3 of 3 — Study consent</div>
+        <p class="mb-3">Before you begin, please read the Participant Information Sheet and confirm your consent to take part in this research study.</p>
+        <div class="consent-iframe-wrapper mb-3">
+          <iframe
+            id="consentIframe"
+            src="https://app.onlinesurveys.jisc.ac.uk/s/portsmouth/participant-information-sheet-1"
+            title="Participant Information Sheet and Consent Form"
+            class="consent-iframe"
+            loading="lazy"
+          ></iframe>
+        </div>
+        <div id="consentCodeSection" class="mb-3" style="display:none">
+          <label for="consentCodeInput" class="form-label small text-muted mb-1">Enter the completion code shown at the end of the consent form:</label>
+          <input type="text" class="form-control consent-code-input" id="consentCodeInput" placeholder="Enter code" style="text-transform: uppercase;">
+          <div id="consentCodeError" class="text-danger small mt-1" style="display:none"></div>
+        </div>
+        <div class="d-grid">
+          <button id="btnConsentContinue" class="btn btn-secondary" disabled>
+            Please complete the form above
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1200">
+    <div id="toast" class="toast text-bg-dark" role="alert" aria-live="assertive" aria-atomic="true"><div class="toast-body" id="toastBody">Saved.</div></div>
+  </div>
+
+  <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasOLM">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">My mastery</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body small">
+      <p class="text-muted mb-3">
+        Your current progress, goals, and next steps.
+      </p>
+      <div id="olmList"></div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="goalModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content text-dark">
+        <div class="modal-header">
+          <h5 class="modal-title" id="goalModalLabel">Set goal</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="range" class="form-range" id="goalRange" min="50" max="100" step="5" />
+          <div class="text-end"><span id="goalRangeVal">80%</span></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="goalSave">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content text-dark reflect-modal">
+        <div class="modal-header">
+          <div>
+            <h5 class="modal-title" id="noteModalLabel">Quick Review</h5>
+            <p class="reflect-subtitle mb-0">How did you find this resource?</p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Star Rating -->
+          <div class="reflect-section">
+            <div class="reflect-stars" id="noteModalStars" role="group" aria-label="Rating">
+              <i class="bi bi-star" data-val="1" role="button" tabindex="0" aria-label="1 star"></i>
+              <i class="bi bi-star" data-val="2" role="button" tabindex="0" aria-label="2 stars"></i>
+              <i class="bi bi-star" data-val="3" role="button" tabindex="0" aria-label="3 stars"></i>
+              <i class="bi bi-star" data-val="4" role="button" tabindex="0" aria-label="4 stars"></i>
+              <i class="bi bi-star" data-val="5" role="button" tabindex="0" aria-label="5 stars"></i>
+            </div>
+            <div class="reflect-rating-label" id="noteModalRatingLabel"></div>
+          </div>
+
+          <!-- Quick Feeling Pills -->
+          <div class="reflect-section">
+            <div class="reflect-feelings" id="noteModalSentiment">
+              <button type="button" class="feeling-pill" data-sent="positive">
+                <span class="feeling-emoji">😊</span>
+                <span class="feeling-text">Got it!</span>
+              </button>
+              <button type="button" class="feeling-pill" data-sent="neutral">
+                <span class="feeling-emoji">🤔</span>
+                <span class="feeling-text">Okay</span>
+              </button>
+              <button type="button" class="feeling-pill" data-sent="negative">
+                <span class="feeling-emoji">😕</span>
+                <span class="feeling-text">Stuck</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Comment -->
+          <div class="reflect-section reflect-comment-section">
+            <textarea
+              id="noteModalBody"
+              class="form-control"
+              rows="2"
+              maxlength="280"
+              placeholder="Any thoughts? (optional)"
+            ></textarea>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <small class="text-muted"><span id="noteModalCharCount">0</span>/280</small>
+              <span class="note-modal-status small text-muted" id="noteModalStatus" aria-live="polite"></span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary w-100" id="noteModalSave"><i class="bi bi-check2 me-1"></i>Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasCompleted">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">Completed items</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body small" id="completedList"></div>
+  </div>
+
+  <!-- Big toast overlay -->
+  <div id="bigToast" class="big-toast-overlay" role="status" aria-live="polite" aria-atomic="true">
+    <div class="big-toast">
+      <div id="bigToastMsg">Well done!</div>
+      <div class="mt-3">
+        <button class="btn btn-sm btn-light">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add: loading overlay (center screen while items load) -->
+  <div id="loadingOverlay" class="loading-overlay" role="status" aria-live="polite" aria-atomic="true" aria-busy="true" style="display:none">
+    <div class="loading-box">
+      <div class="spinner-border text-light" role="status" aria-hidden="true"></div>
+      <div id="loadingMsg" class="mt-3 fw-semibold">Co-ordinating your next helpful step…</div>
+    </div>
+  </div>
+
+  <!-- Periodic Survey Modal -->
+  <div id="surveyOverlay" class="survey-overlay" style="display:none">
+    <div class="survey-container">
+      <div class="survey-header">
+        <h5 class="mb-0">Pilot Study Survey</h5>
+        <span id="surveyWeekBadge" class="badge bg-primary ms-2">Week 4</span>
+      </div>
+      <div class="survey-frame-container">
+        <iframe id="surveyIframe" class="survey-iframe" title="Pilot Study Survey"></iframe>
+      </div>
+      <div class="survey-footer">
+        <div id="surveyCodeSection" class="me-auto" style="display:none">
+          <label for="surveyCodeInput" class="form-label small text-muted mb-1">Enter the completion code shown at the end of the survey:</label>
+          <input type="text" class="form-control" id="surveyCodeInput" placeholder="Enter code" style="width: 200px;">
+          <div id="surveyCodeError" class="text-danger small mt-1" style="display:none"></div>
+        </div>
+        <button type="button" class="btn btn-success" id="btnSurveyDone">
+          <i class="bi bi-check2-circle me-1"></i>I've Completed the Survey
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- External Content Modal (for URLs that can't be embedded in lesson viewer) -->
+  <div class="modal fade" id="externalContentModal" tabindex="-1" aria-labelledby="externalContentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title" id="externalContentModalLabel">Resource</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div id="externalContentLoader" class="text-center py-5">
+            <div class="spinner-border text-light" role="status"></div>
+            <div class="mt-2 text-muted">Loading resource...</div>
+          </div>
+          <iframe id="externalContentFrame" class="external-content-iframe" title="External resource" style="display:none"></iframe>
+          <div id="externalContentFallback" class="text-center py-5" style="display:none">
+            <i class="bi bi-exclamation-triangle fs-1 text-warning mb-3 d-block"></i>
+            <p class="mb-3">This resource cannot be displayed in an embedded frame.</p>
+            <a id="externalContentLink" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light">
+              <i class="bi bi-box-arrow-up-right me-1"></i>Open in new tab
+            </a>
+          </div>
+        </div>
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-outline-light" id="btnExternalContentOpen">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Open in new tab
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer links: accessibility, AI info, privacy -->
+  <footer class="text-center py-3" style="border-top:1px solid #2a2a2a;font-size:0.8rem;color:var(--xelra-muted);">
+    <a href="about_ai.html" class="text-muted me-3">About AI Recommendations</a>
+    <a href="privacy.html" class="text-muted me-3">Privacy</a>
+    <a href="accessibility.html" class="text-muted me-3">Accessibility</a>
+    <a href="certificate.html" class="text-muted">My Certificate</a>
+  </footer>
+
+  <script type="module" src="../js/olm-enhanced.js"></script>
+  <script type="module" src="../js/pages/standalone.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/xelra-md-live.js" defer></script>
+  <script src="../js/ui/a11y-toolbar.js" defer></script>
+</body>
+</html>

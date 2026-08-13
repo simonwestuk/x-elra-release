@@ -1,0 +1,171 @@
+{
+  "study": "study3_sensitivity",
+  "design": {
+    "n_episodes": 150,
+    "sigma": 0.12,
+    "defaults": {
+      "budget": 5,
+      "dwell_minutes": 5,
+      "cooldown_scale": 1.0
+    },
+    "variant_mechanism": "budget/dwell parameterise the deployed constant in the adapter (defaults use the deployed code path); cooldown scaling uses a temporary YAML copy"
+  },
+  "policy_comparison": {
+    "ARL": {
+      "mean_delay_min": 6.37,
+      "delay_ci": 0.77,
+      "under_support_rate": 0.5,
+      "mor": 2.27,
+      "density_per_h": 0.85
+    },
+    "B1": {
+      "mean_delay_min": 0.03,
+      "delay_ci": 0.02,
+      "under_support_rate": 0.0,
+      "mor": 2.66,
+      "density_per_h": 15.65
+    },
+    "B2": {
+      "mean_delay_min": 6.04,
+      "delay_ci": 0.68,
+      "under_support_rate": 0.5,
+      "mor": 2.66,
+      "density_per_h": 0.57
+    },
+    "B5": {
+      "mean_delay_min": 4.33,
+      "delay_ci": 0.08,
+      "under_support_rate": 0.0,
+      "mor": 2.27,
+      "density_per_h": 3.29
+    }
+  },
+  "sweep": {
+    "budget": [
+      {
+        "mean_delay_min": 4.88,
+        "delay_ci": 0.57,
+        "under_support_rate": 0.265,
+        "mor": 2.27,
+        "density_per_h": 0.84,
+        "value": 1
+      },
+      {
+        "mean_delay_min": 6.37,
+        "delay_ci": 0.77,
+        "under_support_rate": 0.5,
+        "mor": 2.27,
+        "density_per_h": 0.85,
+        "value": 2
+      },
+      {
+        "mean_delay_min": 6.37,
+        "delay_ci": 0.77,
+        "under_support_rate": 0.5,
+        "mor": 2.27,
+        "density_per_h": 0.85,
+        "value": 3
+      },
+      {
+        "mean_delay_min": 6.37,
+        "delay_ci": 0.77,
+        "under_support_rate": 0.5,
+        "mor": 2.27,
+        "density_per_h": 0.85,
+        "value": 5
+      },
+      {
+        "mean_delay_min": 6.37,
+        "delay_ci": 0.77,
+        "under_support_rate": 0.5,
+        "mor": 2.27,
+        "density_per_h": 0.85,
+        "value": 8
+      }
+    ],
+    "dwell": [
+      {
+        "mean_delay_min": 6.67,
+        "delay_ci": 0.77,
+        "under_support_rate": 0.5,
+        "mor": 2.53,
+        "density_per_h": 0.85,
+        "value": 0
+      },
+      {
+        "mean_delay_min": 6.36,
+        "delay_ci": 0.76,
+        "under_support_rate": 0.5,
+        "mor": 2.28,
+        "density_per_h": 0.85,
+        "value": 2
+      },
+      {
+        "mean_delay_min": 6.37,
+        "delay_ci": 0.77,
+        "under_support_rate": 0.5,
+        "mor": 2.27,
+        "density_per_h": 0.85,
+        "value": 5
+      },
+      {
+        "mean_delay_min": 6.53,
+        "delay_ci": 0.77,
+        "under_support_rate": 0.5,
+        "mor": 2.27,
+        "density_per_h": 0.85,
+        "value": 10
+      },
+      {
+        "mean_delay_min": 6.34,
+        "delay_ci": 0.77,
+        "under_support_rate": 0.5,
+        "mor": 2.16,
+        "density_per_h": 0.85,
+        "value": 15
+      }
+    ],
+    "cooldown_scale": [
+      {
+        "mean_delay_min": 0.35,
+        "delay_ci": 0.1,
+        "under_support_rate": 0.45,
+        "mor": 1.25,
+        "density_per_h": 1.24,
+        "value": 0.25
+      },
+      {
+        "mean_delay_min": 6.9,
+        "delay_ci": 0.52,
+        "under_support_rate": 0.2233,
+        "mor": 1.85,
+        "density_per_h": 1.24,
+        "value": 0.5
+      },
+      {
+        "mean_delay_min": 6.37,
+        "delay_ci": 0.77,
+        "under_support_rate": 0.5,
+        "mor": 2.27,
+        "density_per_h": 0.85,
+        "value": 1.0
+      },
+      {
+        "mean_delay_min": 0.03,
+        "delay_ci": 0.03,
+        "under_support_rate": 0.75,
+        "mor": 2.27,
+        "density_per_h": 0.57,
+        "value": 2.0
+      },
+      {
+        "mean_delay_min": 0.03,
+        "delay_ci": 0.03,
+        "under_support_rate": 0.75,
+        "mor": 2.27,
+        "density_per_h": 0.57,
+        "value": 4.0
+      }
+    ]
+  }
+}

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>X-ELRA Lesson</title>
+  <!--
+    xelra-md-live configuration:
+    - Dynamically configured via URL parameters
+    - Telemetry sent to /v1/telemetry/live endpoints
+  -->
+  <meta
+    name="xelra-md-live"
+    id="xelra-config"
+    data-engine="skulpt"
+    data-auto-select-engine="false"
+    data-telemetry-consent="granted"
+    data-telemetry-base-url="/v1/telemetry/live"
+    data-timeout-ms="7000"
+  />
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1rem;
+      background: #fff;
+    }
+    h1, h2, h3 { margin-top: 1.5em; margin-bottom: 0.5em; }
+    h1 { font-size: 1.8em; }
+    h2 { font-size: 1.4em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
+    h3 { font-size: 1.2em; }
+    code { background: #f4f4f4; padding: 0.15em 0.3em; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f8f8f8; border: 1px solid #ddd; border-radius: 4px; padding: 0.8em; overflow-x: auto; }
+    pre code { background: none; padding: 0; }
+    blockquote { border-left: 4px solid #2d7ef7; margin: 1em 0; padding: 0.5em 1em; background: #f0f7ff; }
+    blockquote strong { color: #1a5bb8; }
+    .lesson-loading { text-align: center; padding: 2em; color: #666; }
+    .lesson-error { background: #fff0f0; border: 1px solid #ffcccc; padding: 1em; border-radius: 4px; color: #c00; }
+    /* xelra-md-live widget styles */
+    .xelra-live { margin: 1em 0; border: 1px solid #ddd; border-radius: 6px; overflow: hidden; }
+    .xelra-live__label { display: block; background: #f5f5f5; padding: 0.4em 0.8em; font-size: 0.85em; color: #666; border-bottom: 1px solid #ddd; }
+    .xelra-live__editor { display: block; width: 100%; min-height: 120px; padding: 0.8em; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9em; border: none; resize: vertical; box-sizing: border-box; }
+    .xelra-live__controls { display: flex; gap: 0.5em; padding: 0.5em 0.8em; background: #f9f9f9; border-top: 1px solid #eee; }
+    .xelra-live__button { padding: 0.4em 0.8em; border: 1px solid #ccc; border-radius: 4px; background: #fff; cursor: pointer; font-size: 0.85em; }
+    .xelra-live__button:hover { background: #f0f0f0; }
+    .xelra-live__button--run { background: #2d7ef7; color: #fff; border-color: #2d7ef7; }
+    .xelra-live__button--run:hover { background: #1a5bb8; }
+    .xelra-live__output { margin: 0; padding: 0.8em; background: #1e1e1e; color: #d4d4d4; min-height: 2em; max-height: 300px; overflow: auto; font-family: 'Consolas', 'Monaco', monospace; font-size: 0.9em; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; text-wrap: pretty; }
+    .xelra-live__status { padding: 0 0.8em; font-size: 0.8em; color: #666; }
+    .xelra-live__hint { padding: 0.8em; background: #fffbea; border-top: 1px solid #f5e6b3; font-size: 0.9em; }
+    .xelra-live__reflection { padding: 0.8em; background: #f0f7ff; border-top: 1px solid #cce0ff; }
+    .xelra-live__reflection textarea { width: 100%; min-height: 60px; margin-top: 0.5em; padding: 0.5em; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9em; box-sizing: border-box; }
+    /* Click-to-reveal answer blocks */
+    details.xelra-answer { margin: 1em 0; border: 1px solid #d4edda; border-radius: 6px; background: #f8fdf9; }
+    details.xelra-answer summary { padding: 0.6em 1em; cursor: pointer; font-weight: 600; color: #28a745; user-select: none; list-style: none; }
+    details.xelra-answer summary::before { content: "\25b6\00a0"; font-size: 0.8em; display: inline-block; transition: transform 0.2s ease; }
+    details.xelra-answer[open] summary::before { transform: rotate(90deg); }
+    details.xelra-answer summary::-webkit-details-marker { display: none; }
+    details.xelra-answer > *:not(summary) { padding: 0 1em; }
+    details.xelra-answer > pre { margin: 0.5em 1em 1em; padding: 0.8em; }
+    details.xelra-answer > p:last-child { padding-bottom: 0.8em; }
+  </style>
+</head>
+<body>
+  <div id="lesson-content" class="lesson-loading">Loading lesson...</div>
+
+  <script>
+    // Parse URL parameters for dynamic configuration
+    function getParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    // Configure xelra-md-live meta tag from URL parameters
+    function configureXelra() {
+      const meta = document.getElementById('xelra-config');
+      if (!meta) return;
+
+      const params = {
+        'item-id': getParam('item_id') || getParam('itemId') || 'lesson',
+        'learner-id': getParam('learner_id') || getParam('learnerId') || 'anonymous',
+        'session-id': getParam('session_id') || getParam('sessionId') || 'session',
+        'attempt-id': getParam('attempt_id') || getParam('attemptId') || 'attempt',
+      };
+
+      for (const [key, value] of Object.entries(params)) {
+        if (value) {
+          meta.setAttribute('data-' + key, value);
+        }
+      }
+    }
+
+    // Track loaded state
+    let lessonContentLoaded = false;
+    let xelraReady = false;
+    let pendingHtml = null;
+
+    // Bootstrap xelra-md-live when both content and script are ready
+    function tryBootstrap() {
+      if (!lessonContentLoaded || !xelraReady) return;
+      if (window.XelraMdLive && typeof window.XelraMdLive.bootstrap === 'function') {
+        window.XelraMdLive.bootstrap(document);
+      }
+    }
+
+    // Load lesson content from URL parameter
+    async function loadLesson() {
+      const container = document.getElementById('lesson-content');
+      const lessonUrl = getParam('url') || getParam('lesson');
+
+      if (!lessonUrl) {
+        container.innerHTML = '<div class="lesson-error">No lesson URL provided. Add ?url=/path/to/lesson.html</div>';
+        return;
+      }
+
+      try {
+        const response = await fetch(lessonUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to load lesson: ${response.status} ${response.statusText}`);
+        }
+        const html = await response.text();
+        container.innerHTML = html;
+        container.classList.remove('lesson-loading');
+        lessonContentLoaded = true;
+        pendingHtml = html;
+
+        // Try to bootstrap if xelra-md-live is already loaded
+        tryBootstrap();
+      } catch (err) {
+        container.innerHTML = `<div class="lesson-error">Error loading lesson: ${err.message}</div>`;
+        console.error('Lesson load error:', err);
+      }
+    }
+
+    // Listen for xelra-md-live ready event
+    document.addEventListener('xelra-md-live:ready', (evt) => {
+      xelraReady = true;
+      // Re-bootstrap if content was already loaded
+      tryBootstrap();
+    });
+
+    // Also check if already loaded (in case event fired before listener attached)
+    if (window.XelraMdLive) {
+      xelraReady = true;
+    }
+
+    // Listen for configuration updates from parent window
+    window.addEventListener('message', (evt) => {
+      if (!evt || typeof evt.data !== 'object') return;
+      const { type, learnerId, itemId, sessionId, attemptId } = evt.data;
+
+      if (type === 'XELRA_CONFIG_UPDATE') {
+        const meta = document.getElementById('xelra-config');
+        if (!meta) return;
+        if (learnerId) meta.setAttribute('data-learner-id', learnerId);
+        if (itemId) meta.setAttribute('data-item-id', itemId);
+        if (sessionId) meta.setAttribute('data-session-id', sessionId);
+        if (attemptId) meta.setAttribute('data-attempt-id', attemptId);
+      }
+
+      if (type === 'XELRA_PARENT_RESET') {
+        // Reset lesson state if requested
+        const container = document.getElementById('lesson-content');
+        if (container) {
+          container.innerHTML = '<div class="lesson-loading">Loading lesson...</div>';
+          lessonContentLoaded = false;
+        }
+      }
+    });
+
+    // Initialize
+    configureXelra();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadLesson);
+    } else {
+      loadLesson();
+    }
+  </script>
+
+  <!-- Load xelra-md-live AFTER configuration is set -->
+  <script src="../js/xelra-md-live.js"></script>
+</body>
+</html>
