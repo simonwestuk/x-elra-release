@@ -39,7 +39,7 @@
       "step_minutes": 2.0,
       "not_exited_within_bound": 0,
       "max_exit_steps": 7,
-      "note": "deployed dwell-refresh anchoring; persistent sub-dwell contradiction re-arms the dwell (the latch analysed in the thesis)"
+      "note": "deployed dwell-refresh anchoring; persistent sub-dwell contradiction re-arms the dwell"
     },
     "supra_dwell_recovery": {
       "step_minutes": 6.0,

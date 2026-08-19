@@ -27,9 +27,9 @@ Properties checked:
      Reported under three regimes: (a) recovery decisions every DT (2 min),
      i.e. faster than the 5-minute dwell; (b) recovery decisions every 6 min,
      i.e. slower than the dwell, the deployment's request-driven regime; and
-     (c) regime (a) under the entry-anchored dwell counterfactual. Regime (a)
-     exercises the deployed dwell-refresh anchoring under persistent sub-dwell
-     contradiction; the thesis analyses this mechanism.
+     (c) regime (a) under an entry-anchored dwell variant (not deployed
+     behaviour). Regime (a) exercises the deployed dwell-refresh anchoring
+     under persistent sub-dwell contradiction.
 """
 
 from __future__ import annotations
@@ -256,8 +256,8 @@ def main():
 
     safety_ok = (len(violations) == 0)
     # The deployed liveness claim is made at the deployment's request-driven
-    # (supra-dwell) cadence and under the entry-anchored counterfactual;
-    # regime (a) documents the dwell-refresh latch.
+    # (supra-dwell) cadence and under the entry-anchored variant; regime (a)
+    # documents the deployed dwell-refresh anchoring.
     liveness_ok = (b_stuck == 0 and c_stuck == 0)
     out_ok = safety_ok and liveness_ok
 
@@ -275,13 +275,13 @@ def main():
     print(f"  (a) sub-dwell recovery ({DT:g} min steps, deployed anchoring): "
           f"{a_stuck} not exited within bound"
           f"{f', max steps-to-exit = {a_exit}' if a_stuck == 0 else ''} "
-          f"[dwell-refresh latch regime]")
+          f"[deployed dwell-refresh anchoring]")
     print(f"  (b) supra-dwell recovery ({RECOVERY_SLOW_DT:g} min steps, "
           f"deployment cadence): {b_stuck} stuck; max steps-to-exit = {b_exit} "
           f"(bound {bound})")
     print(f"  (c) sub-dwell recovery under entry-anchored dwell "
-          f"(counterfactual): {c_stuck} stuck; max steps-to-exit = {c_exit} "
-          f"(bound {bound})")
+          f"(variant, not deployed behaviour): {c_stuck} stuck; "
+          f"max steps-to-exit = {c_exit} (bound {bound})")
     print("RESULT:", "PASS" if out_ok else "FAIL")
 
     import json
@@ -330,8 +330,7 @@ def main():
                 "step_minutes": DT, "not_exited_within_bound": a_stuck,
                 "max_exit_steps": a_exit,
                 "note": "deployed dwell-refresh anchoring; persistent "
-                        "sub-dwell contradiction re-arms the dwell (the "
-                        "latch analysed in the thesis)"},
+                        "sub-dwell contradiction re-arms the dwell"},
             "supra_dwell_recovery": {
                 "step_minutes": RECOVERY_SLOW_DT,
                 "stuck": b_stuck, "max_exit_steps": b_exit,
