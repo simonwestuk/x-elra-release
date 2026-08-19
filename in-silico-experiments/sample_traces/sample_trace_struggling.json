@@ -1,82 +1,77 @@
 {
-  "learner_id": "std_demo_0001",
-  "trace_id": "7099e0df368e0a502ec978b1939616ce5b7b1a1d7d14e4dd1c990742c8756f4d",
-  "timestamp": 30.0,
-  "routines_version": "v1",
+  "trace_id": "f744d9a3e20590d224089c6869300c19f6b52bbe1d0fdcf6f34efe8f8994fe7e",
+  "deterministic_hash": "064d2d5d419e7bc8ef8ff37f26daf2db4506d4d44d73797d9b546a444f5d6b54",
+  "seed": 6454297928923324513,
+  "timestamp": "2026-03-10T09:30:00+00:00",
+  "routines_version": "V1",
+  "context_summary": {
+    "learner_id": "std_demo_0001",
+    "timestamp": "2026-03-10T09:30:00+00:00",
+    "topic": [
+      "s_low",
+      "s_high",
+      "s_mean"
+    ],
+    "session_phase": "practice",
+    "impressions_30d": 40,
+    "clicks_14d": 4,
+    "completions_7d": 0,
+    "active_goals": 1,
+    "skill_coverage": 7,
+    "days_since_engagement": 0.5
+  },
   "state_before": {
-    "mode": "STRUGGLING",
-    "mode_entered_at": 0.0,
+    "mode": "struggling",
     "budgets": {
       "interventions_remaining": 4,
       "suggestions_remaining": 8
     },
     "cooldowns": {
-      "P6": 5.0
-    },
-    "stability_counters": {
-      "mode_transitions": 0,
-      "last_transition_times": []
+      "P6": "2026-03-10T09:25:00+00:00"
     }
   },
-  "inputs_summary": {
+  "inputs_used": {
     "mastery_range": [
       0.1,
       0.85
     ],
     "engagement_level": "active",
-    "confusion_flag": true,
-    "frustration_flag": true,
-    "feature_gap": 0,
     "candidates_count": 10
   },
   "routine_path": [
     {
-      "routine_id": "P1",
+      "routine_name": "P1",
       "outcome": "SKIPPED",
-      "reason": "mode_mismatch",
-      "action_selected": null,
-      "mode_transition": null,
-      "terminated_evaluation": false
+      "reason": "mode_mismatch"
     },
     {
-      "routine_id": "P2",
+      "routine_name": "P2",
       "outcome": "SKIPPED",
-      "reason": "mode_mismatch",
-      "action_selected": null,
-      "mode_transition": null,
-      "terminated_evaluation": false
+      "reason": "mode_mismatch"
     },
     {
-      "routine_id": "P8",
+      "routine_name": "P8",
       "outcome": "EXECUTED_ACTION",
-      "reason": "triggers_met_and_bounded",
-      "action_selected": "suggest_wellbeing_break",
-      "mode_transition": null,
-      "terminated_evaluation": true
+      "reason": "triggers_met_and_bounded"
     }
   ],
   "decision": {
     "action": "suggest_wellbeing_break",
     "source_routine": "P8",
-    "is_bounded_intervention": true
+    "executed": "P8"
   },
   "state_after": {
-    "mode": "STRUGGLING",
-    "mode_entered_at": 0.0,
+    "mode": "struggling",
     "budgets": {
-      "interventions_remaining": 4,
-      "suggestions_remaining": 9
+      "interventions_remaining": 3,
+      "suggestions_remaining": 7
     },
     "cooldowns": {
-      "P6": 5.0,
-      "P8": 30.0
-    },
-    "stability_counters": {
-      "mode_transitions": 0,
-      "last_transition_times": []
+      "P6": "2026-03-10T09:25:00+00:00",
+      "P8": "2026-03-10T09:30:00+00:00"
     }
   },
-  "exit_conditions": [
+  "next_transition_conditions": [
     {
       "condition": "mastery_min > 0.5",
       "monitored_field": "mastery"
@@ -88,9 +83,126 @@
   ],
   "olm_projection": {
     "mode_label": "Supporting",
-    "why": "You may benefit from additional support where progress has been slower.",
-    "system_behaviour": "It will offer targeted, bounded support and avoid overloading you.",
-    "expected_action": "Review the suggested support and try the next problem.",
+    "why": "You may benefit from additional support in areas like s low where progress has been slower.",
+    "system_behaviour": "The system will offer targeted resources to help with s low and similar areas.",
+    "expected_action": "Review the suggested support resources focusing on areas where you need more practice.",
     "exit_conditions": "Once you show progress, support will adjust."
+  },
+  "replay_inputs": {
+    "learner_id": "std_demo_0001",
+    "mastery": {
+      "s_low": 0.1,
+      "s_high": 0.85,
+      "s_mean": 0.45
+    },
+    "goals": [
+      {
+        "id": "g1"
+      }
+    ],
+    "recommendations": [
+      {
+        "item_id": "py101_res_00",
+        "score": 0.9,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_01",
+        "score": 0.85,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_02",
+        "score": 0.8,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_03",
+        "score": 0.75,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_04",
+        "score": 0.7,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_05",
+        "score": 0.65,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_06",
+        "score": 0.6,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_07",
+        "score": 0.55,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_08",
+        "score": 0.5,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_09",
+        "score": 0.45,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      }
+    ],
+    "metadata": {
+      "clicks_last_14_days": 4,
+      "completions_last_7_days": 0,
+      "days_since_last_engagement": 0.5,
+      "impressions_last_30_days": 40,
+      "active_goal_count": 1,
+      "progress_rate": 0.02,
+      "feature_gap": 0,
+      "confusion_flag": true,
+      "frustration_flag": true,
+      "mastery_count": 7
+    },
+    "generated_at": "2026-03-10T09:30:00+00:00"
+  },
+  "state_before_full": {
+    "learner_id": "std_demo_0001",
+    "mode": "struggling",
+    "budgets": {
+      "interventions_remaining": 4,
+      "suggestions_remaining": 8
+    },
+    "timers": {
+      "last_intervention": "2026-03-10T09:25:00+00:00",
+      "last_mode_transition": null,
+      "last_routine_executed": {
+        "P6": "2026-03-10T09:25:00+00:00"
+      },
+      "session_start": "2026-03-10T09:00:00+00:00"
+    },
+    "recent_outcomes": {
+      "decision_history": [],
+      "transition_times": [],
+      "max_history": 10
+    },
+    "metadata": {
+      "time_since_last_intervention_seconds": 300.0,
+      "elapsed_since_routine_seconds": {
+        "P6": 300.0
+      }
+    },
+    "version": "1.0.0",
+    "updated_at": "2026-03-10T09:00:00+00:00"
   }
 }

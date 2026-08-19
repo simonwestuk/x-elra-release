@@ -1,123 +1,105 @@
 {
-  "learner_id": "std_demo_0002",
-  "trace_id": "13af871efa60f4f91870538e4396b88dc0ebc2f210e36904a9ce5b997e480470",
-  "timestamp": 30.0,
-  "routines_version": "v1",
+  "trace_id": "b45edae726297bea4fc6c49ab7683a1578570d1dd2b19805ec362755d272719c",
+  "deterministic_hash": "cd4ef91424126470636b73a12a4422a497b3b896cce9a9d3f7501798a44d0fb6",
+  "seed": 12965151358506436101,
+  "timestamp": "2026-03-10T09:30:00+00:00",
+  "routines_version": "V1",
+  "context_summary": {
+    "learner_id": "std_demo_0002",
+    "timestamp": "2026-03-10T09:30:00+00:00",
+    "topic": [
+      "s_low",
+      "s_high",
+      "s_mean"
+    ],
+    "session_phase": "practice",
+    "impressions_30d": 40,
+    "clicks_14d": 4,
+    "completions_7d": 0,
+    "active_goals": 1,
+    "skill_coverage": 7,
+    "days_since_engagement": 0.5
+  },
   "state_before": {
-    "mode": "STRUGGLING",
-    "mode_entered_at": 0.0,
+    "mode": "struggling",
     "budgets": {
       "interventions_remaining": 0,
       "suggestions_remaining": 0
     },
     "cooldowns": {
-      "P3": 29.0,
-      "P8": 29.0
-    },
-    "stability_counters": {
-      "mode_transitions": 0,
-      "last_transition_times": []
+      "P6": "2026-03-10T09:25:00+00:00",
+      "P3": "2026-03-10T09:29:00+00:00",
+      "P8": "2026-03-10T09:29:00+00:00"
     }
   },
-  "inputs_summary": {
+  "inputs_used": {
     "mastery_range": [
       0.1,
       0.85
     ],
     "engagement_level": "active",
-    "confusion_flag": true,
-    "frustration_flag": true,
-    "feature_gap": 0,
     "candidates_count": 10
   },
   "routine_path": [
     {
-      "routine_id": "P1",
+      "routine_name": "P1",
       "outcome": "SKIPPED",
-      "reason": "mode_mismatch",
-      "action_selected": null,
-      "mode_transition": null,
-      "terminated_evaluation": false
+      "reason": "mode_mismatch"
     },
     {
-      "routine_id": "P2",
+      "routine_name": "P2",
       "outcome": "SKIPPED",
-      "reason": "mode_mismatch",
-      "action_selected": null,
-      "mode_transition": null,
-      "terminated_evaluation": false
+      "reason": "mode_mismatch"
     },
     {
-      "routine_id": "P8",
-      "outcome": "BLOCKED",
-      "reason": "budget_interventions",
-      "action_selected": null,
-      "mode_transition": null,
-      "terminated_evaluation": false
-    },
-    {
-      "routine_id": "P3",
-      "outcome": "BLOCKED",
-      "reason": "budget_interventions",
-      "action_selected": null,
-      "mode_transition": null,
-      "terminated_evaluation": false
-    },
-    {
-      "routine_id": "P4",
+      "routine_name": "P8",
       "outcome": "SKIPPED",
-      "reason": "mode_mismatch",
-      "action_selected": null,
-      "mode_transition": null,
-      "terminated_evaluation": false
+      "reason": "cooldown_active"
     },
     {
-      "routine_id": "P5",
+      "routine_name": "P3",
       "outcome": "SKIPPED",
-      "reason": "mode_mismatch",
-      "action_selected": null,
-      "mode_transition": null,
-      "terminated_evaluation": false
+      "reason": "cooldown_active"
     },
     {
-      "routine_id": "P6",
+      "routine_name": "P4",
       "outcome": "SKIPPED",
-      "reason": "mode_mismatch",
-      "action_selected": null,
-      "mode_transition": null,
-      "terminated_evaluation": false
+      "reason": "mode_mismatch"
     },
     {
-      "routine_id": "P7",
+      "routine_name": "P5",
       "outcome": "SKIPPED",
-      "reason": "mode_mismatch",
-      "action_selected": null,
-      "mode_transition": null,
-      "terminated_evaluation": false
+      "reason": "mode_mismatch"
+    },
+    {
+      "routine_name": "P6",
+      "outcome": "SKIPPED",
+      "reason": "mode_mismatch"
+    },
+    {
+      "routine_name": "P7",
+      "outcome": "SKIPPED",
+      "reason": "mode_mismatch"
     }
   ],
   "decision": {
-    "action": "recommend_next",
-    "source_routine": "DEFAULT",
-    "is_bounded_intervention": false
+    "action": null,
+    "source_routine": null,
+    "executed": "NO_ACTION"
   },
   "state_after": {
-    "mode": "STRUGGLING",
-    "mode_entered_at": 0.0,
+    "mode": "struggling",
     "budgets": {
       "interventions_remaining": 0,
       "suggestions_remaining": 0
     },
     "cooldowns": {
-      "P3": 29.0,
-      "P8": 29.0
-    },
-    "stability_counters": {
-      "mode_transitions": 0,
-      "last_transition_times": []
+      "P6": "2026-03-10T09:25:00+00:00",
+      "P3": "2026-03-10T09:29:00+00:00",
+      "P8": "2026-03-10T09:29:00+00:00"
     }
   },
-  "exit_conditions": [
+  "next_transition_conditions": [
     {
       "condition": "mastery_min > 0.5",
       "monitored_field": "mastery"
@@ -129,9 +111,130 @@
   ],
   "olm_projection": {
     "mode_label": "Supporting",
-    "why": "You may benefit from additional support where progress has been slower.",
-    "system_behaviour": "It will offer targeted, bounded support and avoid overloading you.",
-    "expected_action": "Review the suggested support and try the next problem.",
+    "why": "You may benefit from additional support in areas like s low where progress has been slower.",
+    "system_behaviour": "The system will offer targeted resources to help with s low and similar areas.",
+    "expected_action": "Review the suggested support resources focusing on areas where you need more practice.",
     "exit_conditions": "Once you show progress, support will adjust."
+  },
+  "replay_inputs": {
+    "learner_id": "std_demo_0002",
+    "mastery": {
+      "s_low": 0.1,
+      "s_high": 0.85,
+      "s_mean": 0.45
+    },
+    "goals": [
+      {
+        "id": "g1"
+      }
+    ],
+    "recommendations": [
+      {
+        "item_id": "py101_res_00",
+        "score": 0.9,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_01",
+        "score": 0.85,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_02",
+        "score": 0.8,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_03",
+        "score": 0.75,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_04",
+        "score": 0.7,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_05",
+        "score": 0.65,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_06",
+        "score": 0.6,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_07",
+        "score": 0.55,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_08",
+        "score": 0.5,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      },
+      {
+        "item_id": "py101_res_09",
+        "score": 0.45,
+        "source": "hybrid_recommender",
+        "action_type": "recommend"
+      }
+    ],
+    "metadata": {
+      "clicks_last_14_days": 4,
+      "completions_last_7_days": 0,
+      "days_since_last_engagement": 0.5,
+      "impressions_last_30_days": 40,
+      "active_goal_count": 1,
+      "progress_rate": 0.02,
+      "feature_gap": 0,
+      "confusion_flag": true,
+      "frustration_flag": true,
+      "mastery_count": 7
+    },
+    "generated_at": "2026-03-10T09:30:00+00:00"
+  },
+  "state_before_full": {
+    "learner_id": "std_demo_0001",
+    "mode": "struggling",
+    "budgets": {
+      "interventions_remaining": 0,
+      "suggestions_remaining": 0
+    },
+    "timers": {
+      "last_intervention": "2026-03-10T09:29:00+00:00",
+      "last_mode_transition": null,
+      "last_routine_executed": {
+        "P6": "2026-03-10T09:25:00+00:00",
+        "P3": "2026-03-10T09:29:00+00:00",
+        "P8": "2026-03-10T09:29:00+00:00"
+      },
+      "session_start": "2026-03-10T09:00:00+00:00"
+    },
+    "recent_outcomes": {
+      "decision_history": [],
+      "transition_times": [],
+      "max_history": 10
+    },
+    "metadata": {
+      "time_since_last_intervention_seconds": 60.0,
+      "elapsed_since_routine_seconds": {
+        "P6": 300.0,
+        "P3": 60.0,
+        "P8": 60.0
+      }
+    },
+    "version": "1.0.0",
+    "updated_at": "2026-03-10T09:00:00+00:00"
   }
 }

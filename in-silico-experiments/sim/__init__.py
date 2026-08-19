@@ -1,33 +1,32 @@
-"""X-ELRA: a reference implementation of Agentic Regulated Learning (ARL).
+"""In-silico experiment environment for the X-ELRA controller.
 
-This package provides a bounded, deterministic regulatory controller that
-translates probabilistic perceptions and candidate actions into learner-facing
-interventions (or deliberate non-interventions), emitting a structured,
-replayable decision trace at every decision point.
+This package supplies the experimental environment around the evaluated
+controller: the synthetic learner simulator, the evaluation metrics, the
+comparator baseline policies, and the configuration loader that parameterises
+them. It contains no ARL controller implementation; every governed decision
+in the studies and property tests is taken by the deployed X-ELRA governance
+code, loaded verbatim by adapters/deployed_policy.py.
 
 Modules
 -------
-state       : ControllerState and mode constants.
-dsl         : YAML routine-specification loader + guarded predicate evaluator.
-modes        : deterministic, precedence-ordered mode inference.
-controller  : the ARL perception--reasoning--action--evaluation control loop.
-traces      : decision-trace construction, deterministic hashing, PROV-O export.
-baselines   : B1 (direct-ML), B2 (rule-based ITS), B3 (OLM-only) comparators.
+state       : minimal state and mode constants used by the baselines.
+dsl         : YAML configuration loader + guarded predicate evaluator.
+modes       : the shared perception-to-stance thresholds used by baselines.
+baselines   : B1 (direct-ML), B2 (rule-based ITS), B3 (OLM-only),
+              B5 (smoothed) comparators.
 perception  : synthetic learner simulator with controllable perception noise.
 metrics     : oscillation, predictability, audit-sufficiency, fairness metrics.
 """
 
 from .state import ControllerState, MODES, MODE_LABELS
-from .controller import ARLController
 from .dsl import RoutineSet, load_routine_set
 
 __all__ = [
     "ControllerState",
     "MODES",
     "MODE_LABELS",
-    "ARLController",
     "RoutineSet",
     "load_routine_set",
 ]
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"

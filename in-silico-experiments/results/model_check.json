@@ -1,9 +1,10 @@
 {
-  "toolchain": "explicit-state bounded reachability (custom checker, Python 3); deduplicated breadth-first exploration over an abstracted state key",
+  "checked_code": "deployed governance modules (xelra/arl, loaded verbatim via the experiment adapter) with the production routine configuration",
+  "toolchain": "explicit-state bounded reachability (custom checker, Python 3); deduplicated breadth-first exploration over an abstracted state key; clock pinned to decision time",
   "properties": {
     "P1_safety_budgets": "AG (0 <= interventions_remaining <= B and 0 <= suggestions_remaining <= B_s)",
     "P2_safety_modes": "AG (mode in declared modes)",
-    "P3_liveness_cooldown_exit": "AG (mode=COOLDOWN -> AF mode!=COOLDOWN under recovery input, within the dwell+window bound)"
+    "P3_liveness_cooldown_exit": "AG (mode=COOLDOWN -> AF mode!=COOLDOWN under recovery input) per recovery regime"
   },
   "abstraction": {
     "perception_alphabet": [
@@ -15,7 +16,8 @@
       "CONSOL",
       "DIAG"
     ],
-    "state_key": "(step, mode, dwell-bucket, interventions_remaining, suggestions_remaining, cooldown elapsed-buckets, recent-transition count, budget-reset bucket); time bucketed at DT and capped"
+    "state_key": "(step, mode, dwell-reference bucket, last-intervention bucket, interventions_remaining, suggestions_remaining, per-routine cooldown buckets, windowed transition-age buckets, capped transition count, capped session resets); time bucketed at DT",
+    "clock": "deployed windowed-oscillation clock pinned to the simulated decision time (production coincidence)"
   },
   "bounds": {
     "horizon_steps": 16,
@@ -23,17 +25,33 @@
     "node_cap": 150000
   },
   "coverage": {
-    "states_explored": 107635,
+    "states_explored": 25886,
     "frontier_remaining": 0,
     "node_cap_hit": false,
     "exhaustive_within_bound": true
   },
   "counterexamples": {
-    "safety_violations": 0,
-    "liveness_stuck": 0,
-    "total": 0
+    "safety_violations": 0
   },
-  "cooldown_states_checked": 50300,
-  "max_cooldown_exit_steps": 12,
-  "cooldown_exit_bound_steps": 20
+  "cooldown_states_checked": 22,
+  "liveness": {
+    "sub_dwell_recovery": {
+      "step_minutes": 2.0,
+      "not_exited_within_bound": 0,
+      "max_exit_steps": 7,
+      "note": "deployed dwell-refresh anchoring; persistent sub-dwell contradiction re-arms the dwell (the latch analysed in the thesis)"
+    },
+    "supra_dwell_recovery": {
+      "step_minutes": 6.0,
+      "stuck": 0,
+      "max_exit_steps": 3,
+      "bound_steps": 20
+    },
+    "entry_anchored_counterfactual": {
+      "step_minutes": 2.0,
+      "stuck": 0,
+      "max_exit_steps": 7,
+      "bound_steps": 20
+    }
+  }
 }

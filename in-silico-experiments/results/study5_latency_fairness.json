@@ -4,82 +4,82 @@
     "by_candidates": [
       {
         "n_candidates": 1,
-        "us_per_decision_core": 31.35,
-        "us_per_decision_with_trace": 128.34,
+        "us_per_decision_core": 30.48,
+        "us_per_decision_with_trace": 123.23,
         "trace_bytes": 3758
       },
       {
         "n_candidates": 5,
-        "us_per_decision_core": 31.41,
-        "us_per_decision_with_trace": 139.95,
+        "us_per_decision_core": 30.89,
+        "us_per_decision_with_trace": 136.15,
         "trace_bytes": 4098
       },
       {
         "n_candidates": 10,
-        "us_per_decision_core": 31.44,
-        "us_per_decision_with_trace": 155.79,
+        "us_per_decision_core": 30.66,
+        "us_per_decision_with_trace": 150.82,
         "trace_bytes": 4524
       },
       {
         "n_candidates": 25,
-        "us_per_decision_core": 31.24,
-        "us_per_decision_with_trace": 201.02,
+        "us_per_decision_core": 30.72,
+        "us_per_decision_with_trace": 195.49,
         "trace_bytes": 5797
       },
       {
         "n_candidates": 50,
-        "us_per_decision_core": 30.7,
-        "us_per_decision_with_trace": 271.61,
+        "us_per_decision_core": 30.68,
+        "us_per_decision_with_trace": 268.85,
         "trace_bytes": 7920
       },
       {
         "n_candidates": 100,
-        "us_per_decision_core": 30.66,
-        "us_per_decision_with_trace": 418.08,
+        "us_per_decision_core": 30.79,
+        "us_per_decision_with_trace": 413.21,
         "trace_bytes": 12166
       },
       {
         "n_candidates": 250,
-        "us_per_decision_core": 30.52,
-        "us_per_decision_with_trace": 880.16,
+        "us_per_decision_core": 30.53,
+        "us_per_decision_with_trace": 854.1,
         "trace_bytes": 24899
       },
       {
         "n_candidates": 500,
-        "us_per_decision_core": 32.02,
-        "us_per_decision_with_trace": 1596.27,
+        "us_per_decision_core": 30.64,
+        "us_per_decision_with_trace": 1578.61,
         "trace_bytes": 46122
       }
     ],
     "by_routines": [
       {
         "n_routines": 8,
-        "us_per_decision_core": 30.71,
-        "us_per_decision_with_trace": 153.99,
+        "us_per_decision_core": 30.92,
+        "us_per_decision_with_trace": 152.48,
         "trace_bytes": 4524
       },
       {
         "n_routines": 16,
-        "us_per_decision_core": 33.69,
-        "us_per_decision_with_trace": 167.81,
+        "us_per_decision_core": 33.6,
+        "us_per_decision_with_trace": 166.56,
         "trace_bytes": 5140
       },
       {
         "n_routines": 32,
-        "us_per_decision_core": 38.79,
-        "us_per_decision_with_trace": 189.98,
+        "us_per_decision_core": 39.09,
+        "us_per_decision_with_trace": 188.91,
         "trace_bytes": 6372
       },
       {
         "n_routines": 64,
-        "us_per_decision_core": 49.26,
-        "us_per_decision_with_trace": 236.01,
+        "us_per_decision_core": 49.33,
+        "us_per_decision_with_trace": 232.9,
         "trace_bytes": 8836
       },
       {
         "n_routines": 128,
-        "us_per_decision_core": 70.01,
-        "us_per_decision_with_trace": 320.34,
+        "us_per_decision_core": 70.67,
+        "us_per_decision_with_trace": 323.63,
         "trace_bytes": 13764
       }
     ],

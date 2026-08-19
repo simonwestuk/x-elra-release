@@ -32,60 +32,13 @@ import json
 import numpy as np
 
 from common import ROUTINES, SEED, save_json
-from sim.dsl import load_routine_set, RoutineSet
-from sim.controller import ARLController
-from sim.state import ControllerState as HarnessState
+from sim.dsl import load_routine_set
+from sim.baselines import B1DirectML
 from sim.perception import make_population, make_stream
 from deployed_policy import DeployedARLPolicy, fv_from_step, ControllerState
 
 N_POP = 150
 N_OI = 60
-
-
-def _init_state(rs):
-    return HarnessState(interventions_remaining=rs.budget_interventions,
-                        suggestions_remaining=rs.budget_suggestions)
-
-
-def _routine_set_without_guard(rs: RoutineSet) -> RoutineSet:
-    """Build a guard-free variant: no DIAGNOSTIC mode, no P2 data-integrity guard.
-
-    Missing data is then ignored and the controller infers a pedagogical mode
-    from incomplete perception."""
-    raw = {
-        "version": rs.version + "-noguard",
-        "budgets": {"interventions": rs.budget_interventions,
-                    "suggestions": rs.budget_suggestions,
-                    "reset_minutes": rs.budget_reset_minutes},
-        "stability": {"dwell_minutes": rs.dwell_minutes,
-                      "oscillation_window_minutes": rs.oscillation_window_minutes,
-                      "oscillation_k": rs.oscillation_k},
-        "modes": [], "routines": [],
-    }
-    for m in rs.modes.values():
-        if m.id == "DIAGNOSTIC":
-            continue
-        raw["modes"].append({
-            "id": m.id, "label": m.label, "precedence": m.precedence,
-            "entry": m.entry, "permitted_routines": [r for r in m.permitted_routines if r != "P2"],
-            "perception_inferred": m.perception_inferred,
-        })
-    for r in rs.routines:
-        if r.id == "P2":
-            continue
-        raw["routines"].append({
-            "id": r.id, "name": r.name, "version": r.version, "priority": r.priority,
-            "objective": r.objective, "permitted_modes": [pm for pm in r.permitted_modes if pm != "DIAGNOSTIC"],
-            "triggers": r.triggers, "cost": {"interventions": r.interventions_cost,
-                                             "suggestions": r.suggestions_cost},
-            "cooldown_minutes": r.cooldown_minutes, "action": r.action, "terminates": r.terminates,
-        })
-    return RoutineSet(raw)
-
-
-# Pedagogical/affective actions that should NOT be taken on incomplete data.
-_PEDAGOGICAL_ACTIONS = {"offer_guided_steps", "suggest_wellbeing_break",
-                        "suggest_stretch_goal", "suggest_consolidation"}
 
 
 def _outage_stream(seed, n_steps=40, outage=(15, 31), dt=1.5):
@@ -199,21 +152,22 @@ def _routine_seq(stream):
 
 
 def missing_modality_guard(n_learners=120):
+    """Deployed guard behaviour on incomplete data, contrasted with the
+    ungoverned direct policy B1 (which has no integrity guard) on the same
+    streams."""
     rs = load_routine_set(ROUTINES)
-    rs_ng = _routine_set_without_guard(rs)
-    ctrl_ng = ARLController(rs_ng)
+    b1 = B1DirectML(rs)
 
-    missing_steps = to_diag = dep_pedagogical = dep_probe = gf_inappropriate = 0
-    episodes = ep_dep = ep_gf = 0
+    missing_steps = to_diag = dep_pedagogical = dep_probe = b1_acts = 0
+    episodes = ep_dep = ep_b1 = 0
     det_ok = True
     for j in range(n_learners):
         stream = _outage_stream(seed=SEED + 3 + j)
         seq = _routine_seq(stream)
         det_ok = det_ok and (seq == _routine_seq(stream))
-        s_ng = _init_state(rs_ng)
-        flag_dep = flag_gf = False
-        for (stance, routine, _), (t, perc, cands) in zip(seq, stream):
-            dec_ng, _, s_ng = ctrl_ng.decide(s_ng, perc, cands, t)
+        b1_steps = b1.run(stream)
+        flag_dep = flag_b1 = False
+        for (stance, routine, _), b1s, (t, perc, cands) in zip(seq, b1_steps, stream):
             if perc["feature_gap"] > 2:
                 missing_steps += 1
                 if stance == "DIAGNOSTIC":
@@ -223,12 +177,12 @@ def missing_modality_guard(n_learners=120):
                     flag_dep = True
                 if routine == "P2":
                     dep_probe += 1
-                if dec_ng["action"] in _PEDAGOGICAL_ACTIONS:
-                    gf_inappropriate += 1
-                    flag_gf = True
+                if b1s.intervened:
+                    b1_acts += 1
+                    flag_b1 = True
         episodes += 1
         ep_dep += int(flag_dep)
-        ep_gf += int(flag_gf)
+        ep_b1 += int(flag_b1)
     return {
         "missing_modality_decisions": missing_steps,
         "routed_to_diagnostic_rate": round(to_diag / max(missing_steps, 1), 4),
@@ -236,15 +190,16 @@ def missing_modality_guard(n_learners=120):
             round(dep_pedagogical / max(missing_steps, 1), 4),
         "deployed_integrity_probe_rate":
             round(dep_probe / max(missing_steps, 1), 4),
-        "guardfree_inappropriate_action_rate":
-            round(gf_inappropriate / max(missing_steps, 1), 4),
+        "unguarded_b1_action_rate":
+            round(b1_acts / max(missing_steps, 1), 4),
         "episodes": episodes,
         "episodes_deployed_pedagogical_on_incomplete_data": ep_dep,
-        "episodes_guardfree_acted_on_incomplete_data": ep_gf,
+        "episodes_unguarded_b1_acted": ep_b1,
         "determinism_on_outage_streams": bool(det_ok),
         "note": "P2 is the data-integrity probe permitted in DIAGNOSTIC (the "
                 "guard acting); pedagogical/affective routines are P3/P5/P6/P8. "
-                "Guard-free counterfactual is the published harness ablation.",
+                "The unguarded contrast is the direct policy B1, which has no "
+                "integrity guard and acts on the incomplete perception.",
     }
 
 
@@ -328,10 +283,10 @@ def main():
     print(f"(c) Guard: {g['missing_modality_decisions']} incomplete-data decisions, "
           f"{100*g['routed_to_diagnostic_rate']:.0f}% to DIAGNOSTIC; pedagogical "
           f"actions {100*g['deployed_pedagogical_action_rate']:.0f}% (integrity probe "
-          f"{100*g['deployed_integrity_probe_rate']:.0f}%) vs guard-free "
-          f"{100*g['guardfree_inappropriate_action_rate']:.0f}%; episodes "
+          f"{100*g['deployed_integrity_probe_rate']:.0f}%) vs ungoverned B1 "
+          f"{100*g['unguarded_b1_action_rate']:.0f}%; episodes "
           f"{g['episodes_deployed_pedagogical_on_incomplete_data']}/{g['episodes']} vs "
-          f"{g['episodes_guardfree_acted_on_incomplete_data']}/{g['episodes']}; "
+          f"{g['episodes_unguarded_b1_acted']}/{g['episodes']}; "
           f"determinism={g['determinism_on_outage_streams']}")
     print(f"(d) Late signal: {late.get('n_differing_decisions')} differing from index "
           f"{late.get('first_differing_index')} (shift at {late.get('shift_index')}); "

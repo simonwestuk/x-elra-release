@@ -23,7 +23,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
-from .controller import ARLController
 from .dsl import RoutineSet
 from .modes import infer_mode
 from .perception import SPECIALIZED_MODES
@@ -50,41 +49,6 @@ def _mode_action(rs: RoutineSet, mode: str) -> Optional[str]:
             if best is None or r.priority > best.priority:
                 best = r
     return best.action if best else None
-
-
-class ARLPolicy:
-    name = "ARL"
-
-    def __init__(self, rs: RoutineSet):
-        self.rs = rs
-        self.controller = ARLController(rs)
-
-    def run(self, stream, learner_id="L") -> List[StepResult]:
-        # Warm-start the initial mode from the first materialised snapshot so the
-        # controller does not pay an artificial COLD_START -> mode transition.
-        t0, perc0, cands0 = stream[0]
-        ns0 = dict(perc0); ns0["n_candidates"] = len(cands0)
-        state = ControllerState(
-            mode=infer_mode(self.rs, ns0),
-            mode_entered_at=t0,
-            interventions_remaining=self.rs.budget_interventions,
-            suggestions_remaining=self.rs.budget_suggestions,
-            last_budget_reset=t0,
-        )
-        out = []
-        for (t, perc, cands) in stream:
-            decision, trace, state = self.controller.decide(state, perc, cands, t, learner_id)
-            out.append(StepResult(
-                t=t,
-                stance=decision["mode"],
-                intervened=bool(decision["is_bounded_intervention"]),
-                is_bounded=bool(decision["is_bounded_intervention"]),
-                action=decision["action"],
-                log_record=trace.to_dict(),     # ARL persists the full trace
-                trace=trace.to_dict(),
-                mode_transition=decision["mode_transition"],
-            ))
-        return out
 
 
 class B1DirectML:
@@ -229,29 +193,3 @@ class B5SmoothedML:
             rec = {"t": t, "learner": learner_id, "action": action} if intervened else None
             out.append(StepResult(t, stance, intervened, intervened, action, log_record=rec))
         return out
-
-
-def routine_set_without_anti_oscillation(rs: RoutineSet) -> RoutineSet:
-    """Return a copy of a routine set with the anti-oscillation mechanism removed.
-
-    Sets the minimum dwell time to zero and the oscillation threshold to
-    effectively infinite, so the controller re-infers its mode every step with no
-    hysteresis. Used for the ARL ablation that isolates the contribution of the
-    dwell-time and oscillation-detection mechanisms (boundedness, trace, and mode
-    gating are retained)."""
-    import copy
-    rs2 = copy.copy(rs)
-    rs2.dwell_minutes = 0.0
-    rs2.oscillation_k = 10 ** 9
-    return rs2
-
-
-def make_policies(rs: RoutineSet) -> Dict[str, Any]:
-    return {
-        "ARL": ARLPolicy(rs),
-        "B1": B1DirectML(rs),
-        "B2": B2RuleITS(rs),
-        "B3": B3OLMOnly(rs),
-        "B5": B5SmoothedML(rs),
-        "ARL_noAO": ARLPolicy(routine_set_without_anti_oscillation(rs)),
-    }

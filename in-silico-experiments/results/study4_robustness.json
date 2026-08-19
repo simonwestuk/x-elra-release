@@ -19,12 +19,12 @@
     "routed_to_diagnostic_rate": 1.0,
     "deployed_pedagogical_action_rate": 0.0,
     "deployed_integrity_probe_rate": 0.0625,
-    "guardfree_inappropriate_action_rate": 0.0625,
+    "unguarded_b1_action_rate": 1.0,
     "episodes": 120,
     "episodes_deployed_pedagogical_on_incomplete_data": 0,
-    "episodes_guardfree_acted_on_incomplete_data": 120,
+    "episodes_unguarded_b1_acted": 120,
     "determinism_on_outage_streams": true,
-    "note": "P2 is the data-integrity probe permitted in DIAGNOSTIC (the guard acting); pedagogical/affective routines are P3/P5/P6/P8. Guard-free counterfactual is the published harness ablation."
+    "note": "P2 is the data-integrity probe permitted in DIAGNOSTIC (the guard acting); pedagogical/affective routines are P3/P5/P6/P8. The unguarded contrast is the direct policy B1, which has no integrity guard and acts on the incomplete perception."
   },
   "late_signal_snapshot": {
     "applicable": true,
