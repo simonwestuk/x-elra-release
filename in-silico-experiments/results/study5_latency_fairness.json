@@ -1,0 +1,120 @@
+{
+  "study": "study5_latency_fairness",
+  "latency": {
+    "by_candidates": [
+      {
+        "n_candidates": 1,
+        "us_per_decision_core": 30.48,
+        "us_per_decision_with_trace": 123.23,
+        "trace_bytes": 3758
+      },
+      {
+        "n_candidates": 5,
+        "us_per_decision_core": 30.89,
+        "us_per_decision_with_trace": 136.15,
+        "trace_bytes": 4098
+      },
+      {
+        "n_candidates": 10,
+        "us_per_decision_core": 30.66,
+        "us_per_decision_with_trace": 150.82,
+        "trace_bytes": 4524
+      },
+      {
+        "n_candidates": 25,
+        "us_per_decision_core": 30.72,
+        "us_per_decision_with_trace": 195.49,
+        "trace_bytes": 5797
+      },
+      {
+        "n_candidates": 50,
+        "us_per_decision_core": 30.68,
+        "us_per_decision_with_trace": 268.85,
+        "trace_bytes": 7920
+      },
+      {
+        "n_candidates": 100,
+        "us_per_decision_core": 30.79,
+        "us_per_decision_with_trace": 413.21,
+        "trace_bytes": 12166
+      },
+      {
+        "n_candidates": 250,
+        "us_per_decision_core": 30.53,
+        "us_per_decision_with_trace": 854.1,
+        "trace_bytes": 24899
+      },
+      {
+        "n_candidates": 500,
+        "us_per_decision_core": 30.64,
+        "us_per_decision_with_trace": 1578.61,
+        "trace_bytes": 46122
+      }
+    ],
+    "by_routines": [
+      {
+        "n_routines": 8,
+        "us_per_decision_core": 30.92,
+        "us_per_decision_with_trace": 152.48,
+        "trace_bytes": 4524
+      },
+      {
+        "n_routines": 16,
+        "us_per_decision_core": 33.6,
+        "us_per_decision_with_trace": 166.56,
+        "trace_bytes": 5140
+      },
+      {
+        "n_routines": 32,
+        "us_per_decision_core": 39.09,
+        "us_per_decision_with_trace": 188.91,
+        "trace_bytes": 6372
+      },
+      {
+        "n_routines": 64,
+        "us_per_decision_core": 49.33,
+        "us_per_decision_with_trace": 232.9,
+        "trace_bytes": 8836
+      },
+      {
+        "n_routines": 128,
+        "us_per_decision_core": 70.67,
+        "us_per_decision_with_trace": 323.63,
+        "trace_bytes": 13764
+      }
+    ],
+    "reps": 400,
+    "scope": "governance cycle in-process; service transport/persistence overhead reported in the live deployment chapter"
+  },
+  "fairness": {
+    "ARL": {
+      "A": {
+        "density_mean": 0.449,
+        "density_ci": 0.039,
+        "max_per_window": 2
+      },
+      "B": {
+        "density_mean": 0.446,
+        "density_ci": 0.045,
+        "max_per_window": 2
+      },
+      "parity_ratio": 0.9933,
+      "density_gap": 0.003
+    },
+    "B1": {
+      "A": {
+        "density_mean": 14.761,
+        "density_ci": 0.387,
+        "max_per_window": 15
+      },
+      "B": {
+        "density_mean": 16.5,
+        "density_ci": 0.511,
+        "max_per_window": 16
+      },
+      "parity_ratio": 0.8946,
+      "density_gap": 1.739
+    },
+    "budget_per_window": 5
+  }
+}

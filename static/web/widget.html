@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>X-ELRA Widget</title>
+  <meta
+    name="xelra-md-live"
+    data-engine="skulpt"
+    data-item-id="widget-lesson"
+    data-learner-id="widget-user"
+    data-session-id="widget"
+    data-attempt-id="widget-attempt"
+    data-telemetry-consent="granted"
+    data-telemetry-base-url="/v1/telemetry/live"
+    data-timeout-ms="6000"
+    data-allow-fallback="true"
+  />
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    body{background:transparent}
+    header, footer, .prefs, #olm { display:none; }
+    main{grid-template-columns:1fr; padding:8px}
+    .card{margin:0}
+  </style>
+  <style id="nextup-tick-style">.tick{display:inline-block;margin-left:6px} .tick::after{content:"✓";}</style>
+</head>
+<body>
+  <main>
+    <section>
+      <h2 style="margin-top:0;">Recommended for you</h2>
+      <div id="consentBanner" style="display:none;position:relative;background:#222;color:#fff;padding:0.75em;border-radius:8px;margin-bottom:8px;">
+        <span>
+          Please review our <a href="https://example.com/pis.pdf" target="_blank" style="color:#4af;">Participant Information Sheet</a>
+          and our <a href="./privacy.html" target="_blank" style="color:#4af;">Privacy &amp; Transparency notice</a>.
+          By clicking "I agree", you consent to your data being collected for research purposes.
+        </span>
+        <div style="margin-top:6px;"><button id="btnConsent">I agree</button></div>
+      </div>
+      <div id="reqMeta"></div>
+      <div id="nextUp"></div>
+      <ul id="recs"></ul>
+    </section>
+  </main>
+  <script src="../js/xelra-md-live.js" defer></script>
+  <script type="module">
+import { ARM_MAP, getArmConfig } from '../js/config/policy.js';
+import { buildTelemetryPayload } from '../js/services/telemetry.js';
+import { api } from '../js/services/api.js';
+
+// Global telemetry state
+window.__XELRA_LAST_STRATEGY = window.__XELRA_LAST_STRATEGY || null;
+window.__XELRA_LAST_ARM = window.__XELRA_LAST_ARM || null;
+window.__XELRA_LAST_TELEMETRY = window.__XELRA_LAST_TELEMETRY || null;
+window.__XELRA_NEXTUP_TELEMETRY = window.__XELRA_NEXTUP_TELEMETRY || null;
+
+let COURSE_ID = null;
+
+function qs(name) {
+  const u = new URL(location.href);
+  return u.searchParams.get(name);
+}
+
+function withRequestId(meta, payload = {}) {
+  if (meta && meta.request_id && payload.request_id === undefined) {
+    return { ...payload, request_id: meta.request_id };
+  }
+  return payload;
+}
+
+async function ssoIfPresent() {
+  const token = qs('token');
+  if (!token) return null;
+  const res = await api('/v1/auth/sso', { method: 'POST', body: JSON.stringify({ token }) });
+  COURSE_ID = res.course_id || null;
+  return res.learner_id;
+}
+
+async function ensureConsent(learnerId) {
+  const banner = document.getElementById('consentBanner');
+  const btn = document.getElementById('btnConsent');
+  try {
+    const c = await api(`/v1/telemetry/consent/${encodeURIComponent(learnerId)}`);
+    if (c && c.consent_given) {
+      if (banner) banner.style.display = 'none';
+      return true;
+    }
+    if (banner) banner.style.display = 'block';
+    if (btn) {
+      btn.onclick = async () => {
+        await api('/v1/telemetry/consent', { method: 'POST', body: JSON.stringify({ learner_id: learnerId, consent_given: true }) });
+        if (banner) banner.style.display = 'none';
+        loadWidget();
+      };
+    }
+    return false;
+  } catch (e) {
+    if (banner) banner.style.display = 'block';
+    return false;
+  }
+}
+
+async function applyArmBehaviour(learnerId) {
+  const armRes = await api(`/v1/telemetry/arm/${encodeURIComponent(learnerId)}`);
+  const arm = armRes.arm || 'T';
+  const cfg = getArmConfig(arm);
+  window.__XELRA_LAST_ARM = arm;
+  window.__XELRA_LAST_STRATEGY = cfg.strategy;
+  const meta = document.getElementById('reqMeta');
+  if (meta) {
+    meta.innerHTML = `<div class="meta">Arm: <span class="badge">${arm}</span> — ${cfg.label} ${COURSE_ID ? `· Course: <span class="badge">${COURSE_ID}</span>` : ''}</div>`;
+  }
+  return { arm, cfg };
+}
+
+function impressNextUp(learnerId, item) {
+  if (!item) return;
+  const meta = window.__XELRA_NEXTUP_TELEMETRY || window.__XELRA_LAST_TELEMETRY;
+  const courseId = COURSE_ID || null;
+  const items = [withRequestId(meta, {
+    item_id: item.item_id,
+    rank: 0,
+    source: 'next_up',
+    strategy: window.__XELRA_LAST_STRATEGY || null,
+    arm: window.__XELRA_LAST_ARM || (meta && meta.arm_key) || null,
+    course_id: courseId,
+  })];
+  const payload = buildTelemetryPayload(meta, learnerId, { items });
+  if (payload) {
+    try { api('/v1/telemetry/impression', { method: 'POST', body: JSON.stringify(payload) }); } catch (e) { }
+  }
+}
+
+function renderNextUp(learnerId, item, telemetryMeta) {
+  if (telemetryMeta) {
+    window.__XELRA_NEXTUP_TELEMETRY = telemetryMeta;
+    if (telemetryMeta.arm_key) {
+      window.__XELRA_LAST_ARM = telemetryMeta.arm_key;
+    }
+  }
+  const box = document.getElementById('nextUp');
+  if (!box) return;
+  if (!item) { box.innerHTML = ''; return; }
+  const meta = window.__XELRA_NEXTUP_TELEMETRY;
+  const courseId = COURSE_ID || null;
+  box.innerHTML = `
+    <div class="card">
+      <h3>Next up: ${item.title} <span id="nextTick" class="tick" style="display:none;"></span></h3>
+      <div class="meta">sequence ${item.sequence_order ?? ''}</div>
+      <div class="actions">
+        <button class="btnFeedback">Leave feedback</button>
+        <button id="btnNextOpen">Open</button>
+        <button id="btnNextComplete">Mark complete</button>
+      </div>
+    </div>`;
+  document.getElementById('btnNextOpen').onclick = async () => {
+    const extras = withRequestId(meta, {
+      item_id: item.item_id,
+      action: 'click',
+      source: 'next_up',
+      rank: 0,
+      strategy: window.__XELRA_LAST_STRATEGY || null,
+      arm: window.__XELRA_LAST_ARM || (meta && meta.arm_key) || null,
+      course_id: courseId,
+    });
+    const payload = buildTelemetryPayload(meta, learnerId, extras);
+    if (payload) { await api('/v1/telemetry/click', { method: 'POST', body: JSON.stringify(payload) }); }
+    if (item.url) { window.open(item.url, '_blank'); }
+  };
+  document.getElementById('btnNextComplete').onclick = async () => {
+    const extras = withRequestId(meta, {
+      item_id: item.item_id,
+      action: 'complete',
+      source: 'next_up',
+      rank: 0,
+      strategy: window.__XELRA_LAST_STRATEGY || null,
+      arm: window.__XELRA_LAST_ARM || (meta && meta.arm_key) || null,
+      course_id: courseId,
+    });
+    const payload = buildTelemetryPayload(meta, learnerId, extras);
+    if (payload) { await api('/v1/telemetry/click', { method: 'POST', body: JSON.stringify(payload) }); }
+    const tick = document.getElementById('nextTick');
+    if (tick) tick.style.display = 'inline-block';
+    setTimeout(async () => {
+      try {
+        const payload = { learner_id: learnerId, course_id: COURSE_ID };
+        const nx = await api('/v1/recommend/next_up', { method: 'POST', body: JSON.stringify(payload) });
+        renderNextUp(learnerId, nx.item, nx.telemetry);
+        if (nx && nx.item) impressNextUp(learnerId, nx.item);
+      } catch (e) { /* keep tick */ }
+    }, 600);
+  };
+}
+
+function impressList(learnerId) {
+  const lis = Array.from(document.querySelectorAll('#recs li'));
+  const meta = window.__XELRA_LAST_TELEMETRY;
+  if (!lis.length) return;
+  const courseId = COURSE_ID || null;
+  const items = lis.map((li, idx) => withRequestId(meta, {
+    item_id: li.dataset.itemId,
+    rank: idx + 1,
+    source: 'recs',
+    strategy: window.__XELRA_LAST_STRATEGY || null,
+    arm: window.__XELRA_LAST_ARM || (meta && meta.arm_key) || null,
+    course_id: courseId,
+  }));
+  const payload = buildTelemetryPayload(meta, learnerId, { items });
+  if (payload) { api('/v1/telemetry/impression', { method: 'POST', body: JSON.stringify(payload) }); }
+}
+
+function renderRecs(learnerId, res, cfg) {
+  window.__XELRA_LAST_TELEMETRY = res.telemetry || null;
+  if (cfg && cfg.strategy) {
+    window.__XELRA_LAST_STRATEGY = cfg.strategy;
+  } else if (res && res.strategy) {
+    window.__XELRA_LAST_STRATEGY = res.strategy;
+  }
+  if (res && res.telemetry && res.telemetry.arm_key) {
+    window.__XELRA_LAST_ARM = res.telemetry.arm_key;
+  } else if (res && res.arm) {
+    window.__XELRA_LAST_ARM = res.arm;
+  }
+  const telemetryMeta = window.__XELRA_LAST_TELEMETRY;
+  const reqMeta = document.getElementById('reqMeta');
+  if (reqMeta) {
+    const armLabel = (telemetryMeta && telemetryMeta.arm_key) || res.arm || '-';
+    const requestId = (telemetryMeta && telemetryMeta.request_id) || res.request_id || '-';
+    reqMeta.innerHTML = `<div class="meta">arm: <span class="badge">${armLabel}</span> request_id: <span class="badge">${requestId}</span></div>`;
+  }
+  const ul = document.getElementById('recs');
+  ul.innerHTML = '';
+  const courseId = COURSE_ID || null;
+  (res.items || []).forEach((it, idx) => {
+    const li = document.createElement('li');
+    li.className = 'card';
+    li.dataset.itemId = it.item_id;
+    li.innerHTML = `
+      <h3>${it.title}</h3>
+      <div class="meta">score: ${(it.score || 0).toFixed(3)} <span class="badge">Why this: ${(it.xai && it.xai.summary) ? it.xai.summary : 'n/a'}</span></div>
+      <div class="actions">
+        <button class="btnFeedback">Leave feedback</button>
+        <button class="btnClick">Open</button>
+        <button class="btnExplain">Explain</button>
+        <button class="btnComplete">Mark complete</button>
+      </div>
+      <div class="xai" style="display:none;"></div>
+    `;
+    li.querySelector('.btnClick').addEventListener('click', async () => {
+      const extras = withRequestId(telemetryMeta, {
+        item_id: it.item_id,
+        action: 'click',
+        source: 'recs',
+        rank: idx + 1,
+        strategy: window.__XELRA_LAST_STRATEGY || null,
+        arm: window.__XELRA_LAST_ARM || (telemetryMeta && telemetryMeta.arm_key) || null,
+        course_id: courseId,
+      });
+      const payload = buildTelemetryPayload(telemetryMeta, learnerId, extras);
+      if (payload) { await api('/v1/telemetry/click', { method: 'POST', body: JSON.stringify(payload) }); }
+      if (it.url) { window.open(it.url, '_blank'); }
+    });
+    const btnComplete = li.querySelector('.btnComplete');
+    if (btnComplete) {
+      btnComplete.addEventListener('click', async () => {
+        const extras = withRequestId(telemetryMeta, {
+          item_id: it.item_id,
+          action: 'complete',
+          source: 'recs',
+          rank: idx + 1,
+          strategy: window.__XELRA_LAST_STRATEGY || null,
+          arm: window.__XELRA_LAST_ARM || (telemetryMeta && telemetryMeta.arm_key) || null,
+          course_id: courseId,
+        });
+        const payload = buildTelemetryPayload(telemetryMeta, learnerId, extras);
+        if (payload) { await api('/v1/telemetry/click', { method: 'POST', body: JSON.stringify(payload) }); }
+      });
+    }
+    const xaiBox = li.querySelector('.xai');
+    const btnFb = li.querySelector('.btnFeedback');
+    btnFb.addEventListener('click', async () => {
+      const ratingStr = prompt('Your rating for this item (1-5):', it.rating || '');
+      if (ratingStr === null) return;
+      const rating = ratingStr ? parseInt(ratingStr, 10) : null;
+      const txt = prompt('Your feedback about this item (optional sentiment):', it.comment || '');
+      if (txt === null) return;
+      await api('/v1/feedback', { method: 'POST', body: JSON.stringify({ learner_id: learnerId, item_id: it.item_id, text: txt, rating }) });
+      btnFb.textContent = 'Thanks!';
+      btnFb.disabled = true;
+    });
+    const btnExplain = li.querySelector('.btnExplain');
+    if (!cfg.allowExplain) { btnExplain.style.display = 'none'; }
+    btnExplain.addEventListener('click', async () => {
+      const visible = xaiBox.style.display !== 'none';
+      xaiBox.style.display = visible ? 'none' : 'block';
+      const extras = withRequestId(telemetryMeta, {
+        item_id: it.item_id,
+        action: visible ? 'collapse' : 'expand',
+        level: 'detailed',
+        source: 'recs',
+        rank: idx + 1,
+        strategy: window.__XELRA_LAST_STRATEGY || null,
+        arm: window.__XELRA_LAST_ARM || (telemetryMeta && telemetryMeta.arm_key) || null,
+        course_id: courseId,
+      });
+      const payload = buildTelemetryPayload(telemetryMeta, learnerId, extras);
+      if (payload) {
+        await api('/v1/telemetry/explanation', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+      }
+      if (!visible) { xaiBox.textContent = JSON.stringify(it.xai, null, 2); }
+    });
+    ul.appendChild(li);
+  });
+  setTimeout(() => impressList(learnerId), 50);
+}
+
+async function loadWidget() {
+  let learnerId = qs('learner_id');
+  if (!learnerId) {
+    try { learnerId = await ssoIfPresent(); } catch (e) { console.error(e); }
+  }
+  if (!learnerId) {
+    document.getElementById('recs').innerHTML = '<em>Missing learner_id or token in URL.</em>';
+    return;
+  }
+  const ok = await ensureConsent(learnerId);
+  if (!ok) return;
+  const { cfg } = await applyArmBehaviour(learnerId);
+  try {
+    const nx = await api('/v1/recommend/next_up', { method: 'POST', body: JSON.stringify({ learner_id: learnerId, course_id: COURSE_ID }) });
+    window.__XELRA_NEXTUP_TELEMETRY = nx.telemetry || window.__XELRA_NEXTUP_TELEMETRY;
+    renderNextUp(learnerId, nx.item, nx.telemetry);
+    if (nx && nx.item) impressNextUp(learnerId, nx.item);
+  } catch (e) { renderNextUp(learnerId, null); }
+  const recs = await api('/v1/recommend/recommendations', {
+    method: 'POST',
+    body: JSON.stringify({ learner_id: learnerId, top_k: 5, strategy: cfg.strategy, explain_level: cfg.allowExplain ? 'short' : 'auto', context: { course_id: COURSE_ID } })
+  });
+  renderRecs(learnerId, recs, cfg);
+}
+
+window.addEventListener('DOMContentLoaded', loadWidget);
+  </script>
+</body>
+</html>

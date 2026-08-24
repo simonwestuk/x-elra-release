@@ -1,0 +1,70 @@
+{
+  "study": "study6_fairness",
+  "design": {
+    "n_per_subgroup": 150,
+    "sigma": 0.12,
+    "budget_per_window": 5
+  },
+  "ARL": {
+    "low": {
+      "struggling_rate": 0.1416,
+      "struggling_rate_ci": 0.0198,
+      "density_per_h": 0.797,
+      "density_ci": 0.053,
+      "max_per_window": 2
+    },
+    "medium": {
+      "struggling_rate": 0.3066,
+      "struggling_rate_ci": 0.0244,
+      "density_per_h": 0.621,
+      "density_ci": 0.05,
+      "max_per_window": 2
+    },
+    "high": {
+      "struggling_rate": 0.6592,
+      "struggling_rate_ci": 0.0219,
+      "density_per_h": 0.527,
+      "density_ci": 0.021,
+      "max_per_window": 2
+    },
+    "disparate_impact": {
+      "density_ratio_min_over_max": 0.661,
+      "density_gap": 0.27,
+      "max_window_spread": [
+        2,
+        2
+      ]
+    }
+  },
+  "B1": {
+    "low": {
+      "struggling_rate": 0.8732,
+      "struggling_rate_ci": 0.006,
+      "density_per_h": 35.369,
+      "density_ci": 0.244,
+      "max_per_window": 20
+    },
+    "medium": {
+      "struggling_rate": 0.5922,
+      "struggling_rate_ci": 0.0086,
+      "density_per_h": 23.986,
+      "density_ci": 0.35,
+      "max_per_window": 19
+    },
+    "high": {
+      "struggling_rate": 0.3927,
+      "struggling_rate_ci": 0.0085,
+      "density_per_h": 15.909,
+      "density_ci": 0.343,
+      "max_per_window": 15
+    },
+    "disparate_impact": {
+      "density_ratio_min_over_max": 0.45,
+      "density_gap": 19.46,
+      "max_window_spread": [
+        15,
+        20
+      ]
+    }
+  }
+}

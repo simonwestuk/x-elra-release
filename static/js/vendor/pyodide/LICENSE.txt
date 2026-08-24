@@ -1,0 +1,6 @@
+Pyodide is available under the Mozilla Public License, v. 2.0.
+https://www.mozilla.org/MPL/2.0/
+
+This project vendors a lightweight loader shim that expects the official
+Pyodide distribution to live alongside this directory when deployed.
+For details about Pyodide licensing see: https://pyodide.org/en/stable/project/license.html

@@ -1,0 +1,421 @@
+/**
+ * ARL Actions UI Styles
+ *
+ * Styles for ARL action UI components:
+ * - Break suggestion toast
+ * - Spaced review indicator
+ * - Mode transition notification
+ * - Explanation action toast
+ */
+
+/* ============ Break Suggestion Toast ============ */
+.break-suggestion-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1060;
+  max-width: 400px;
+  background: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  transform: translateY(120%);
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.break-suggestion-toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.break-toast-content {
+  padding: 24px;
+  color: #f8fafc;
+  position: relative;
+}
+
+.break-toast-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: rgba(148, 163, 184, 0.6);
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.break-toast-close:hover {
+  color: #f8fafc;
+}
+
+.break-toast-icon {
+  font-size: 48px;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.break-toast-body {
+  text-align: center;
+}
+
+.break-toast-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #f8fafc;
+}
+
+.break-toast-message {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.break-toast-tips {
+  text-align: left;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 16px 0;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.break-toast-tips ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.break-toast-tips li {
+  margin-bottom: 6px;
+}
+
+.break-toast-tips li:last-child {
+  margin-bottom: 0;
+}
+
+.break-toast-timer {
+  font-size: 2rem;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  margin: 16px 0;
+  padding: 12px 24px;
+  background: rgba(99, 102, 241, 0.15);
+  border-radius: 12px;
+  display: inline-block;
+  color: #a5b4fc;
+}
+
+.break-toast-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.break-toast-actions .btn {
+  min-width: 100px;
+}
+
+.break-toast-actions .btn-outline-light {
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #94a3b8;
+}
+
+.break-toast-actions .btn-outline-light:hover {
+  background: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.5);
+  color: #f8fafc;
+}
+
+.break-toast-actions .btn-light {
+  background: #6366f1;
+  border-color: #6366f1;
+  color: #fff;
+}
+
+.break-toast-actions .btn-light:hover {
+  background: #4f46e5;
+  border-color: #4f46e5;
+}
+
+/* ============ Spaced Review Indicator ============ */
+.spaced-review-indicator {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  z-index: 1050;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 280px;
+  transform: translateX(120%);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.spaced-review-indicator.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.review-indicator-icon {
+  font-size: 28px;
+}
+
+.review-indicator-body {
+  flex: 1;
+}
+
+.review-count {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.review-next-time {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.review-indicator-close {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.review-indicator-close:hover {
+  color: #333;
+}
+
+/* ============ Mode Transition Toast ============ */
+.mode-transition-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-120%);
+  z-index: 1070;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  padding: 16px 20px;
+  max-width: 400px;
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  cursor: pointer;
+}
+
+.mode-transition-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.mode-toast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mode-toast-icon {
+  font-size: 28px;
+}
+
+.mode-toast-body {
+  flex: 1;
+}
+
+.mode-toast-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.mode-toast-message {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.mode-toast-badge {
+  font-size: 0.85rem;
+  padding: 6px 12px;
+}
+
+/* ============ Explanation Action Toast ============ */
+.explanation-action-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1055;
+  max-width: 400px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transform: translateX(-120%);
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  border-left: 4px solid #667eea;
+}
+
+.explanation-action-toast.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.explanation-action-toast.tone-supportive {
+  border-left-color: #48bb78;
+}
+
+.explanation-action-toast.tone-encouraging {
+  border-left-color: #f6ad55;
+}
+
+.explanation-action-toast.tone-neutral {
+  border-left-color: #667eea;
+}
+
+.explain-toast-content {
+  padding: 16px 20px;
+  position: relative;
+}
+
+.explain-toast-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.explain-toast-close:hover {
+  color: #333;
+}
+
+.explain-toast-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.explain-toast-message {
+  font-size: 0.95rem;
+  color: #333;
+  line-height: 1.5;
+  margin-bottom: 12px;
+}
+
+.explain-toast-topics {
+  margin-bottom: 12px;
+}
+
+.explain-toast-cta {
+  margin-top: 8px;
+}
+
+/* ============ Dark Mode Support ============ */
+@media (prefers-color-scheme: dark) {
+  .spaced-review-indicator,
+  .mode-transition-toast,
+  .explanation-action-toast {
+    background: #1e1e1e;
+    color: #e0e0e0;
+  }
+
+  .spaced-review-indicator .review-count,
+  .mode-transition-toast .mode-toast-title {
+    color: #e0e0e0;
+  }
+
+  .spaced-review-indicator .review-next-time,
+  .mode-transition-toast .mode-toast-message {
+    color: #999;
+  }
+
+  .review-indicator-close,
+  .explain-toast-close {
+    color: #666;
+  }
+
+  .review-indicator-close:hover,
+  .explain-toast-close:hover {
+    color: #e0e0e0;
+  }
+}
+
+/* ============ Responsive Adjustments ============ */
+@media (max-width: 576px) {
+  .break-suggestion-toast {
+    left: 10px;
+    right: 10px;
+    max-width: none;
+    bottom: 10px;
+  }
+
+  .spaced-review-indicator {
+    top: auto;
+    bottom: 80px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+
+  .mode-transition-toast {
+    left: 10px;
+    right: 10px;
+    max-width: none;
+    transform: translateY(-120%);
+  }
+
+  .mode-transition-toast.show {
+    transform: translateY(0);
+  }
+
+  .explanation-action-toast {
+    left: 10px;
+    right: 10px;
+    max-width: none;
+    bottom: 100px;
+  }
+}
+
+/* ============ Accessibility ============ */
+@media (prefers-reduced-motion: reduce) {
+  .break-suggestion-toast,
+  .spaced-review-indicator,
+  .mode-transition-toast,
+  .explanation-action-toast {
+    transition: opacity 0.2s ease;
+  }
+
+  .break-suggestion-toast.show,
+  .spaced-review-indicator.show,
+  .mode-transition-toast.show,
+  .explanation-action-toast.show {
+    transform: none;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+.break-toast-actions .btn:focus,
+.review-indicator-close:focus,
+.explain-toast-cta:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
