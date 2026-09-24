@@ -503,14 +503,12 @@ See `xelra/config.py` for full coverage of optional knobs.
 
 ---
 
-
 ## Privacy & Compliance
 
 - **Consent gating:** `/v1/telemetry/consent` must return `consent_given=true` before impressions, clicks, or feedback are stored. Revocation purges recent sentiment aggregates.
 - **Sentiment controls:** Set `INFER_SENTIMENT=0` and `FEATURE_SENTIMENT=0` to disable sentiment capture when you want a minimal telemetry footprint.
 
 ---
-
 
 ## Testing
 
