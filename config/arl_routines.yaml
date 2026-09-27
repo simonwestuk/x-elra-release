@@ -1,0 +1,282 @@
+version: V1
+schema_version: "3.0"
+metadata:
+  description: Alignment Research Lab formal ARL control routines with boundedness
+  owner: ARL Operations
+  contact: arl-ops@example.org
+  changelog:
+    - version: "3.0"
+      date: "2026-01-07"
+      changes: "Added boundedness constraints (permitted_modes, cooldown_seconds, resource_costs)"
+    - version: "1.0"
+      date: "2026-01-12"
+      changes: "Renamed 'policies' to 'control routines' for terminology alignment"
+routines:
+  - id: P1
+    title: Orientation Safety Net
+    priority: 120
+    enabled: true
+    # Boundedness constraints
+    permitted_modes: [cold_start, orientation]
+    cooldown_seconds: 86400  # 24 hours (Table 5)
+    resource_costs:
+      interventions: 1
+    conditions:
+      # Triggers for new learners (COLD_START) or early-stage learners (ORIENTATION)
+      # with empty mastery who need orientation content
+      all:
+        - "feature_vector.mastery is empty"
+    actions:
+      - name: fetch_orientation_playlist
+        type: fetch_recommendations
+        params:
+          strategy: sequence
+          top_k: 5
+      - name: log_orientation_playlist
+        type: log_impressions
+        params:
+          from: fetch_orientation_playlist
+          telemetry_source: arl_orientation
+          schema_version: arl/v2
+    explanation: >-
+      Provide the structured orientation pathway before other strategies execute so
+      that brand-new learners receive a safe baseline experience.
+    tags:
+      - onboarding
+    metadata:
+      escalation: critical
+  - id: P2
+    title: Data Integrity Checks
+    priority: 110
+    enabled: true
+    # Boundedness constraints
+    permitted_modes: [diagnostic]
+    cooldown_seconds: 3600  # 1 hour
+    resource_costs:
+      interventions: 1
+    conditions:
+      # DIAGNOSTIC mode requires feature_gap > 2, so this condition aligns with mode entry
+      # Learner has mastery (not new) but missing other telemetry (goals, completions, etc.)
+      all:
+        - "feature_vector.metadata.feature_gap > 2"
+    actions:
+      - name: fetch_diagnostics_bundle
+        type: fetch_recommendations
+        params:
+          strategy: hybrid
+          top_k: 5
+          diagnostics: true
+      - name: log_diagnostics_bundle
+        type: log_impressions
+        params:
+          from: fetch_diagnostics_bundle
+          telemetry_source: arl_diagnostics
+          schema_version: arl/v2
+    explanation: >-
+      When telemetry indicates missing or corrupted learner features, surface the
+      diagnostic remediation set to rehydrate the profile before personalised
+      exploration resumes.
+    tags:
+      - remediation
+    metadata:
+      escalation: high
+  - id: P8
+    title: Affective Overload Intervention
+    priority: 95
+    enabled: true
+    permitted_modes: [struggling]
+    cooldown_seconds: 7200  # 2 hours
+    resource_costs:
+      interventions: 1
+      suggestions: 1
+    conditions:
+      any:
+        - "feature_vector.metadata.frustration_flag == true"
+        - "feature_vector.metadata.confusion_flag == true"
+    actions:
+      - name: suggest_wellbeing_break
+        type: suggest_break
+        params:
+          duration_minutes: 5
+          reason: wellbeing
+          modality: microbreak
+          prompt: "Take a short break — you've been working hard."
+      - name: fetch_foundations_reset
+        type: fetch_recommendations
+        params:
+          strategy: content
+          top_k: 3
+          focus: fundamentals
+      - name: log_foundations_reset
+        type: log_impressions
+        params:
+          from: fetch_foundations_reset
+          telemetry_source: arl_affect
+          schema_version: arl/v2
+    explanation: >-
+      When affect proxies indicate confusion (diverse error types) or frustration
+      (persistent failure combined with negative sentiment), intervene with a
+      wellbeing break and a short fundamentals reset to stabilise the learner's
+      cognitive state before resuming normal recommendations.
+    tags:
+      - wellbeing
+      - affect
+    metadata:
+      escalation: high
+  - id: P3
+    title: Struggling Learner Uplift
+    priority: 90
+    enabled: true
+    # Boundedness constraints
+    permitted_modes: [struggling]
+    cooldown_seconds: 14400  # 4 hours
+    resource_costs:
+      interventions: 1
+      suggestions: 3
+    conditions:
+      all:
+        - "feature_vector.mastery | lowest < 0.4"
+        - "feature_vector.clicks | last_14_days == 0"
+        - "feature_vector.metadata.impressions_last_30_days > 5"  # Require some history before flagging as struggling
+    actions:
+      - name: fetch_foundations_refresh
+        type: fetch_recommendations
+        params:
+          strategy: content
+          top_k: 5
+          focus: fundamentals
+      - name: log_foundations_refresh
+        type: log_impressions
+        params:
+          from: fetch_foundations_refresh
+          telemetry_source: arl_foundations
+          schema_version: arl/v2
+    explanation: >-
+      Reinforce core concepts for learners who are struggling and have shown no
+      recent engagement by prioritising foundational refresh content.
+    tags:
+      - support
+      - retention
+  - id: P4
+    title: Lapsed Learner Re-engagement
+    priority: 80
+    enabled: true
+    # Boundedness constraints
+    permitted_modes: [lapsed]
+    cooldown_seconds: 604800  # 7 days (Table 5)
+    resource_costs:
+      interventions: 1
+    conditions:
+      all:
+        - "feature_vector.metadata.days_since_last_engagement > 15"  # Table 4: >15 days inactive
+        - "feature_vector.goals | active_count > 0"
+    actions:
+      - name: fetch_goal_reengagement
+        type: fetch_recommendations
+        params:
+          strategy: hybrid
+          top_k: 5
+          emphasise_goals: true
+      - name: log_goal_reengagement
+        type: log_impressions
+        params:
+          from: fetch_goal_reengagement
+          telemetry_source: arl_reengagement
+          schema_version: arl/v2
+    explanation: >-
+      Reactivate dormant learners who still have active goals by combining
+      collaborative and goal-aligned content tuned for re-engagement.
+    tags:
+      - retention
+      - goals
+  - id: P5
+    title: Goal Attainment Accelerator
+    priority: 70
+    enabled: true
+    # Boundedness constraints
+    permitted_modes: [accelerating]
+    cooldown_seconds: 3600  # 1 hour
+    resource_costs:
+      suggestions: 2
+    conditions:
+      all:
+        - "feature_vector.goals | active_count > 0"
+        - "feature_vector.metadata.progress_rate >= 0.05"
+    actions:
+      - name: fetch_goal_accelerator
+        type: fetch_recommendations
+        params:
+          strategy: hybrid
+          top_k: 5
+          boost: goals
+      - name: log_goal_accelerator
+        type: log_impressions
+        params:
+          from: fetch_goal_accelerator
+          telemetry_source: arl_goalpath
+          schema_version: arl/v2
+    explanation: >-
+      When learners are steadily progressing on their active goals, amplify the
+      momentum with a goal-focused accelerator set that deepens mastery.
+    tags:
+      - goals
+      - momentum
+  - id: P6
+    title: Mastery Consolidation
+    priority: 60
+    enabled: true
+    # Boundedness constraints
+    permitted_modes: [consolidating]
+    cooldown_seconds: 7200  # 2 hours
+    resource_costs:
+      suggestions: 2
+    conditions:
+      all:
+        - "feature_vector.mastery | highest >= 0.85"
+        - "feature_vector.completions | last_7_days > 0"
+    actions:
+      - name: fetch_consolidation_drill
+        type: fetch_recommendations
+        params:
+          strategy: hybrid
+          top_k: 5
+          diversify: practice
+      - name: log_consolidation_drill
+        type: log_impressions
+        params:
+          from: fetch_consolidation_drill
+          telemetry_source: arl_consolidation
+          schema_version: arl/v2
+    explanation: >-
+      Encourage deliberate practice when mastery indicators are high by presenting
+      consolidation drills that balance reinforcement and new challenges.
+    tags:
+      - mastery
+      - practice
+  - id: P7
+    title: Default Hybrid Pathway
+    priority: 10
+    enabled: true
+    # Boundedness constraints (Table 4: permitted in NOMINAL, COOLDOWN, ORIENTATION, DIAGNOSTIC)
+    permitted_modes: [nominal, cooldown, orientation, diagnostic]
+    cooldown_seconds: 0  # No cooldown - default pathway
+    resource_costs: {}  # No cost
+    conditions:
+      all: []
+    actions:
+      - name: fetch_default_hybrid
+        type: fetch_recommendations
+        params:
+          strategy: hybrid
+          top_k: 5
+      - name: log_default_hybrid
+        type: log_impressions
+        params:
+          from: fetch_default_hybrid
+          telemetry_source: arl_default
+          schema_version: arl/v2
+    explanation: >-
+      Provide the balanced hybrid recommendation pathway when no higher-priority
+      policy is activated.
+    tags:
+      - baseline

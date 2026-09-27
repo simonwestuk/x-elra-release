@@ -1,0 +1,73 @@
+# Arm-assignment manifest for production experiments.
+# Defines allocation buckets, arm metadata, recommender strategy weights,
+# and explanation/regulatory toggles used by runtime arm resolution.
+policy:
+  version: 2
+buckets:
+  T: treatment
+  A: control_a
+  B: control_b
+weights:
+  treatment: 0.334
+  control_a: 0.333
+  control_b: 0.333
+arms:
+  treatment:
+    label: "ARL Treatment: governed adaptive with process-level regulatory explanations"
+    strategy: hybrid
+    explain: true
+    regulatory_mode: true
+    policy_version: v2
+    routine_version: v2
+    weight_map:
+      content: 0.45
+      cf: 0.25
+      popularity: 0.1
+      sentiment: 0.2
+    xai:
+      enabled: true
+      level: auto
+      method: shap
+    sentiment:
+      enabled: true
+      provider: huggingface
+      model: distilbert-base-uncased-finetuned-sst-2-english
+  control_a:
+    label: "B1 Control: model-driven adaptive with post-hoc feature attribution"
+    strategy: hybrid
+    explain: true
+    regulatory_mode: false
+    policy_version: v2
+    routine_version: v2
+    weight_map:
+      content: 0.45
+      cf: 0.25
+      popularity: 0.1
+      sentiment: 0.2
+    xai:
+      enabled: true
+      level: auto
+      method: shap
+    sentiment:
+      enabled: true
+      provider: huggingface
+      model: distilbert-base-uncased-finetuned-sst-2-english
+  control_b:
+    label: "B3 Control: OLM-only transparency (progress display)"
+    strategy: hybrid
+    explain: false
+    regulatory_mode: false
+    policy_version: v2
+    routine_version: v2
+    weight_map:
+      content: 0.45
+      cf: 0.25
+      popularity: 0.1
+      sentiment: 0.2
+    xai:
+      enabled: false
+      method: none
+    sentiment:
+      enabled: true
+      provider: huggingface
+      model: distilbert-base-uncased-finetuned-sst-2-english

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accessibility Statement &mdash; X-ELRA</title>
+  <style>
+    body{max-width:960px;margin:0 auto;padding:24px 16px;color:#111;background:#f8f9fb;font-family:"Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;line-height:1.6;}
+    header{margin-bottom:32px;text-align:center;}
+    header h1{margin-bottom:0.4em;font-size:2.2rem;}
+    header p{margin:0;color:#555;}
+    section{margin-bottom:32px;background:#fff;border-radius:12px;padding:24px;box-shadow:0 6px 22px rgba(15,23,42,0.08);}
+    section h2{margin-top:0;font-size:1.45rem;color:#0f172a;}
+    ul{margin:0;padding-left:20px;}
+    li{margin-bottom:8px;}
+    .back-link{display:inline-flex;align-items:center;gap:6px;color:#2563eb;text-decoration:none;font-weight:600;}
+    .back-link:hover{text-decoration:underline;}
+    table{width:100%;border-collapse:collapse;margin-top:12px;}
+    th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:0.95rem;}
+    th{background:#f1f5f9;font-weight:600;color:#0f172a;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.05em;}
+    td:first-child{font-weight:500;}
+    .status-yes{color:#16a34a;font-weight:600;}
+    .status-partial{color:#d97706;font-weight:600;}
+    .status-planned{color:#6366f1;font-weight:600;}
+    @media (max-width:640px){section{padding:18px;}body{padding:16px;}header h1{font-size:1.75rem;}}
+  </style>
+</head>
+<body>
+  <header>
+    <a class="back-link" href="./standalone.html">&larr; Back to X-ELRA</a>
+    <h1>Accessibility Statement</h1>
+    <p>Our commitment to making X-ELRA usable by everyone.</p>
+  </header>
+
+  <section>
+    <h2>Overview</h2>
+    <p>
+      X-ELRA aims to conform to the <strong>Web Content Accessibility Guidelines (WCAG) 2.1 Level AA</strong>.
+      We are committed to ensuring that all learners, including those using assistive technologies,
+      can access and benefit from the platform.
+    </p>
+    <p>
+      This statement was last reviewed in March 2026.
+    </p>
+  </section>
+
+  <section>
+    <h2>What we currently support</h2>
+    <table>
+      <thead>
+        <tr><th>Feature</th><th>WCAG Criterion</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Keyboard navigation</td><td>2.1.1 Keyboard</td><td class="status-yes">Supported</td></tr>
+        <tr><td>Skip links to main content</td><td>2.4.1 Bypass Blocks</td><td class="status-yes">Supported</td></tr>
+        <tr><td>Visible focus indicators</td><td>2.4.7 Focus Visible</td><td class="status-yes">Supported</td></tr>
+        <tr><td>Semantic HTML landmarks</td><td>1.3.1 Info and Relationships</td><td class="status-yes">Supported</td></tr>
+        <tr><td>ARIA roles and live regions</td><td>4.1.2 Name, Role, Value</td><td class="status-yes">Supported</td></tr>
+        <tr><td>Form labels and error messages</td><td>1.3.1, 3.3.2</td><td class="status-yes">Supported</td></tr>
+        <tr><td>Reduced-motion support</td><td>2.3.3 Animation from Interactions</td><td class="status-yes">Supported</td></tr>
+        <tr><td>Colour contrast (text)</td><td>1.4.3 Contrast (Minimum)</td><td class="status-partial">Partial</td></tr>
+        <tr><td>Text resizing up to 200%</td><td>1.4.4 Resize Text</td><td class="status-yes">Supported</td></tr>
+        <tr><td>Accessibility toolbar (font scaling, text-to-speech)</td><td>1.4.4, 1.1.1</td><td class="status-yes">Supported</td></tr>
+        <tr><td>Screen reader announcements</td><td>4.1.3 Status Messages</td><td class="status-partial">Partial</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Known limitations</h2>
+    <ul>
+      <li>Some embedded lesson content (iframes) may not fully meet contrast requirements depending on the source material.</li>
+      <li>Interactive code execution environments within lessons may have limited screen reader support.</li>
+      <li>Third-party survey iframes (consent forms, periodic surveys) are outside our direct control and may have their own accessibility limitations.</li>
+      <li>Chart visualisations in researcher-facing analytics views do not currently provide text alternatives.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Assistive technology tested</h2>
+    <ul>
+      <li>NVDA (Windows) with Firefox and Chrome</li>
+      <li>VoiceOver (macOS/iOS) with Safari</li>
+      <li>Keyboard-only navigation across all major browsers</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Feedback and contact</h2>
+    <p>
+      If you encounter accessibility barriers while using X-ELRA, please contact us at
+      <a href="mailto:Simon.West@port.ac.uk">Simon.West@port.ac.uk</a>. We welcome feedback
+      and will work to address issues promptly.
+    </p>
+    <p>
+      When reporting an accessibility issue, please include:
+    </p>
+    <ul>
+      <li>A description of the problem and the page where it occurs.</li>
+      <li>The browser and assistive technology you are using.</li>
+      <li>Any steps needed to reproduce the issue.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Further information</h2>
+    <ul>
+      <li><a href="./about_ai.html">About AI Recommendations</a> &mdash; How the recommendation engine works.</li>
+      <li><a href="./privacy.html">Privacy &amp; Transparency</a> &mdash; How your data is handled.</li>
+    </ul>
+  </section>
+</body>
+</html>
